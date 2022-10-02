@@ -1,75 +1,65 @@
-/*  */
-
 #include "life.h"
 
-Byte
-  Field1[LIFE_H][LIFE_W],
-  Field2[LIFE_H][LIFE_W];
 
-void Swap( Byte (*F1)[LIFE_W], Byte (*F2)[LIFE_W] )
+void Swap( FieldPtr *pF1, FieldPtr *pF2 )
 {
-  for (int y = 0; y < LIFE_H; y++)
-    for (int x = 0; x < LIFE_W; x++)
-      F1[y][x] = F2[y][x];
+  FieldPtr tmp = *pF1;
+  *pF1 = *pF2;
+  *pF2 = tmp;
 }
 
-void SetCell( Byte (*F)[LIFE_W], int x, int y, int is_alive )
+void SetCell( FieldPtr pF, size_t x, size_t y, bool is_alive )
 {
-  F[y][x] = is_alive;
+  //assert(x < FRAME_W && y < FRAME_H);
+  pF[y][x] = is_alive;
 }
 
-int GetCell( Byte (*F)[LIFE_W], int x, int y )
+Byte GetCell( FieldPtr pF, size_t x, size_t y )
 {
   x = (x + LIFE_W) % LIFE_W;
   y = (y + LIFE_H) % LIFE_H;
-  return F[y][x];
+  return pF[y][x];
 }
 
-void FieldInit( Byte (*F)[LIFE_W] )
+void FieldInit( FieldPtr pF )
 {
-  for (int y = 0; y < LIFE_H; y++)
-    for (int x = 0; x < LIFE_W; x++)
-      SetCell(F, x, y, rand() % 2);
+  for (size_t y = 0; y < LIFE_H; ++y)
+    for (size_t x = 0; x < LIFE_W; ++x)
+      SetCell(pF, x, y, true);
 }
 
 
-int GetNeighbours( Byte (*F)[LIFE_W], int x, int y )
+size_t GetNeighbours( FieldPtr pF, size_t x, size_t y )
 {
-  return GetCell(F, x - 1, y) + GetCell(F, x - 1, y + 1) +
-    GetCell(F, x, y + 1) + GetCell(F, x + 1, y + 1) +
-    GetCell(F, x + 1, y) + GetCell(F, x + 1, y - 1) +
-    GetCell(F, x, y - 1) + GetCell(F, x - 1, y - 1);
+  return GetCell(pF, x - 1, y) + GetCell(pF, x - 1, y + 1) +
+         GetCell(pF, x, y + 1) + GetCell(pF, x + 1, y + 1) +
+         GetCell(pF, x + 1, y) + GetCell(pF, x + 1, y - 1) +
+         GetCell(pF, x, y - 1) + GetCell(pF, x - 1, y - 1);
 }
 
-void FieldDraw( Byte (*F)[LIFE_W] )
+void FieldDraw( FieldPtr pF )
 {
-  for (int y = 0; y < LIFE_H; y++)
-    for (int x = 0; x < LIFE_W; x++)
-      if (GetCell(F, x, y))
-        PutPixel(x, y, 0, 0.8, 0);
+  for (size_t y = 0; y < LIFE_H; ++y)
+    for (size_t x = 0; x < LIFE_W; ++x)
+      if (GetCell(pF, x, y))
+        PutPixel(x, y, 0, 0, 128);
       else
-        PutPixel(x, y, 1, 0, 0);
+        PutPixel(x, y, 255, 0, 0);
 }
 
-void NewGeneration( Byte (*F1)[LIFE_W], Byte (*F2)[LIFE_W] )
+void NewGeneration( FieldPtr pF1, FieldPtr pF2 )
 {
-  for (int y = 0; y < LIFE_H; y++)
-    for (int x = 0; x < LIFE_W; x++)
+  for (size_t y = 0; y < LIFE_H; ++y)
+    for (size_t x = 0; x < LIFE_W; ++x)
     {
-      int num_neigh = GetNeighbours(F1, x, y);
-      int is_alive = 0;
+      size_t num_neigh = GetNeighbours(pF1, x, y);
+      bool is_alive = false;
 
-      if (GetCell(F1, x, y))
-        if (num_neigh < 2 || num_neigh > 3)
-          is_alive = 0;
-        else
-          is_alive = 1;
+      if (GetCell(pF1, x, y))
+        is_alive = num_neigh == 2 || num_neigh == 3;
       else
-        if (num_neigh == 3)
-          is_alive = 1;
-        else
-          is_alive = 0;
+        is_alive = num_neigh == 3;
 
-      SetCell(F2, x, y, is_alive);
+      SetCell(pF2, x, y, is_alive);
     }
 }

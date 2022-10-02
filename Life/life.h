@@ -1,32 +1,37 @@
-/*  */
-
 #include <stdlib.h>
+#include <stdbool.h>
+#include <assert.h>
 #include <GL/glut.h>
 
-#define LIFE_H 100
-#define LIFE_W 100
+#define LIFE_H 100ul
+#define LIFE_W 100ul
 #define FRAME_H LIFE_H
 #define FRAME_W LIFE_W
 
+#define WND_H 800ul
+#define WND_W 800ul
+
 typedef unsigned char Byte;
 
-extern Byte
-         Field1[LIFE_H][LIFE_W],
-         Field2[LIFE_H][LIFE_W],
-         Frame[FRAME_H][FRAME_W][3];
+typedef Byte Field_t[LIFE_H][LIFE_W];
+typedef Byte (*FieldPtr)[LIFE_W];
+typedef Byte Frame_t[FRAME_H][FRAME_W][3];
 
-void PutPixel( int x, int y, Byte r, Byte g, Byte b);
+extern Field_t Field1, Field2;
+extern Frame_t Frame;
 
-void SetCell( Byte (*F)[LIFE_W], int x, int y, int value );
+void PutPixel( size_t x, size_t y, Byte r, Byte g, Byte b);
 
-int GetCell( Byte (*F)[LIFE_W], int x, int y );
+void SetCell( FieldPtr pF, size_t x, size_t y, bool is_alive );
 
-void FieldInit( Byte (*F)[LIFE_W] );
+Byte GetCell( FieldPtr pF, size_t x, size_t y );
 
-int GetNeighbours( Byte (*F)[LIFE_W], int x, int y );
+void FieldInit( FieldPtr pF );
 
-void FieldDraw( Byte (*F)[LIFE_W] );
+size_t GetNeighbours( FieldPtr pF, size_t x, size_t y );
 
-void NewGeneration( Byte (*F1)[LIFE_W], Byte (*F2)[LIFE_W] );
+void FieldDraw( FieldPtr pF );
 
-void Swap( Byte (*F1)[LIFE_W], Byte (*F2)[LIFE_W] );
+void NewGeneration( FieldPtr pF1, FieldPtr pF2 );
+
+void Swap( FieldPtr *pF1, FieldPtr *pF2 );

@@ -1,19 +1,28 @@
-/*  */
-
 #include "life.h"
 
-Byte Frame[FRAME_H][FRAME_W][3];
-int Zoom = 8;
-int IsStart = 0;
+Field_t Field1, Field2;
+FieldPtr pActiveField = Field1, pPrevField = Field2;
+Frame_t Frame;
 
-void PutPixel( int x, int y, Byte r, Byte g, Byte b)
+enum Keys
+{
+  KEY_ESC = 27,
+  KEY_SPACE = ' ',
+  KEY_D = 'd',
+  KEY_S = 's'
+};
+
+int Zoom = 8;
+bool IsStart = false;
+
+void PutPixel( size_t x, size_t y, Byte r, Byte g, Byte b)
 {
   Frame[y][x][0] = b;
   Frame[y][x][1] = g;
   Frame[y][x][2] = r;
 }
 
-void Display( void )
+void OnDisplay( void )
 {
   glClearColor(0.3, 0.5, 0.7, 1);
   glClear(0);
@@ -21,11 +30,11 @@ void Display( void )
   glRasterPos2d(-1, 1);
   glPixelZoom(Zoom, -Zoom);
 
-  FieldDraw(Field1);
+  FieldDraw(pActiveField);
   if (IsStart)
   {
-    NewGeneration(Field1, Field2);
-    Swap(Field1, Field2);
+    NewGeneration(pActiveField, pPrevField);
+    Swap(&pActiveField, &pPrevField);
   }
 
   glDrawPixels(FRAME_W, FRAME_H, GL_BGR_EXT, GL_UNSIGNED_BYTE, Frame);
@@ -35,27 +44,33 @@ void Display( void )
   glutPostRedisplay();
 }
 
-void Keyboard( unsigned char Key, int X, int Y )
+bool IsInFrameStop( int x, int y )
 {
+  return !IsStart && y>= 0 && y < (int)FRAME_H && x >= 0 && x < (int)FRAME_W;
+}
+
+void OnKeyboard( unsigned char Key, int x, int y )
+{
+  assert(Zoom != 0);
+
+  int xu = x / Zoom, yu = y / Zoom;
   switch (Key)
   {
-  case 27:
-    exit(0);
+  case KEY_ESC:
+    glutDestroyWindow(glutGetWindow());
     break;
-  case ' ':
-    X /= Zoom;
-    Y /= Zoom;
-    if (!IsStart && X >= 0 && Y >= 0 && Y < FRAME_H && X < FRAME_W)
-      SetCell(Field1, X, Y, 1);
+  case KEY_SPACE:
+    if (IsInFrameStop(xu, yu))
+      SetCell(Field1, xu, yu, true);
     break;
-  case 's':
-    IsStart = 1 - IsStart;
+  case KEY_S:
+    IsStart = !IsStart;
     break;
-  case 'd':
-    X /= Zoom;
-    Y /= Zoom;
-    if (!IsStart && X >= 0 && Y >= 0 && Y < FRAME_H && X < FRAME_W)
-      SetCell(Field1, X, Y, 0);
+  case KEY_D:
+    if (IsInFrameStop(xu, yu))
+      SetCell(Field1, xu, yu, false);
+    break;
+  default:
     break;
   }
 }
@@ -67,11 +82,11 @@ int main( int argc, char *argv[] )
   FieldInit(Field1);
 
   glutInitWindowPosition(0, 0);
-  glutInitWindowSize(800, 800);
-  glutCreateWindow("Happy New Year!");
+  glutInitWindowSize(WND_W, WND_H);
+  glutCreateWindow("Game of life");
 
-  glutDisplayFunc(Display);
-  glutKeyboardFunc(Keyboard);
+  glutDisplayFunc(OnDisplay);
+  glutKeyboardFunc(OnKeyboard);
 
   glutMainLoop();
 }

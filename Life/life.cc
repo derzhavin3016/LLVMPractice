@@ -21,9 +21,7 @@ bool initField(Field *field, std::uint32_t width, std::uint32_t height)
   field->height = height;
   field->field = new (std::nothrow) bool[height * width]{};
 
-  if (field->field == nullptr)
-    return false;
-  return true;
+  return field->field != nullptr;
 }
 
 void fillField(Field *field)

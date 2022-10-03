@@ -2,15 +2,19 @@ cmake_minimum_required(VERSION 3.16)
 
 project(Life)
 
-find_package(OpenGL REQUIRED)
-find_package(GLUT REQUIRED)
+find_package(SFML 2.5 COMPONENTS system window graphics REQUIRED)
 
-set(SRCS "life.c" "main.c")
+set(SRCS life.cc main.cc)
 list(TRANSFORM SRCS PREPEND Life/)
 
 add_executable(${CMAKE_PROJECT_NAME} ${SRCS})
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
-target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -O2)
-target_compile_features(${CMAKE_PROJECT_NAME} PRIVATE c_std_11)
+set(GRAPH_SRCS Life/graph.cc)
+add_library(GraphLib STATIC ${GRAPH_SRCS})
+
+target_link_libraries(GraphLib PRIVATE sfml-window sfml-system sfml-graphics)
+target_compile_options(GraphLib PUBLIC -Wall -Wextra -Wpedantic -O2)
+target_compile_features(GraphLib PUBLIC cxx_std_17)
+
+
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE GraphLib)

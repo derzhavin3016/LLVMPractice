@@ -13,3 +13,8 @@ target_compile_features(GraphLib PUBLIC cxx_std_17)
 
 
 target_link_libraries(Life PRIVATE GraphLib)
+
+set_target_properties(Life
+  PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)

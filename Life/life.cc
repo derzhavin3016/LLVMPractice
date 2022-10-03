@@ -51,8 +51,8 @@ State getCell(Field *field, std::int64_t x, std::int64_t y)
   if (field == nullptr)
     return State::DEAD;
 
-  x = (x + static_cast<std::int64_t>(field->width)) % field->width;
-  y = (y + static_cast<std::int64_t>(field->height)) % field->height;
+  x = (x + field->width) % field->width;
+  y = (y + field->height) % field->height;
 
   return field->field[y * field->width + x];
 }

@@ -2,8 +2,8 @@
 
 int main()
 {
-  std::uint32_t height = 300;
-  std::uint32_t width = 600;
+  std::uint32_t height = 180;
+  std::uint32_t width = 180;
 
   graph::createWindow(width, height);
 

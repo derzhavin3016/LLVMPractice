@@ -8,6 +8,8 @@ void createWindow(std::uint32_t width, std::uint32_t height)
 {
   MainWindow.create(sf::VideoMode(width, height), "Game of Life");
   MainWindow.setPosition({100, 100});
+  MainWindow.setVerticalSyncEnabled(true);
+  MainWindow.setFramerateLimit(0);
 }
 
 bool isWindowOpen()

@@ -26,7 +26,6 @@ extern "C"
     graph::MainWindow.create(sf::VideoMode(width, height), "");
     graph::MainWindow.setPosition({100, 100});
     graph::MainWindow.setVerticalSyncEnabled(true);
-    graph::MainWindow.setFramerateLimit(0);
   }
 
   bool isWindowOpen(void)

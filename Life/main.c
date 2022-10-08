@@ -8,11 +8,6 @@
 bool *pActiveField = 0;
 bool *pNextField = 0;
 
-void setCell(uint32_t x, uint32_t y, bool is_alive)
-{
-  ACCESS_FIELD(pActiveField, x, y) = is_alive;
-}
-
 bool getCell(int64_t x, int64_t y)
 {
   x = (x + FIELD_WIDTH) % FIELD_WIDTH;
@@ -25,7 +20,7 @@ void fillField(void)
 {
   for (uint32_t y = 0; y < FIELD_HEIGHT; ++y)
     for (uint32_t x = 0; x < FIELD_WIDTH; ++x)
-      setCell(x, y, genRandomBool());
+      ACCESS_FIELD(pActiveField, x, y) = genRandomBool();
 }
 
 uint8_t getNeighbours(uint32_t x, uint32_t y)
@@ -61,7 +56,7 @@ void newGeneration(void)
       else
         is_alive = num_neigh == 3;
 
-      setCell(x, y, is_alive);
+      ACCESS_FIELD(pNextField, x, y) = is_alive;
     }
 }
 

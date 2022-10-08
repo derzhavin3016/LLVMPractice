@@ -2,7 +2,6 @@
 
 namespace life
 {
-
 void swapFields(Field *f1, Field *f2)
 {
   if (f1 == nullptr || f2 == nullptr)
@@ -20,7 +19,7 @@ bool initField(Field *field, std::uint32_t width, std::uint32_t height)
 
   field->width = width;
   field->height = height;
-  field->field = new (std::nothrow) State[height * width]{};
+  field->field = new (std::nothrow) bool[height * width]{};
 
   return field->field != nullptr;
 }
@@ -31,25 +30,25 @@ void fillField(Field *field)
     return;
 
   std::random_device rd;
-  std::uniform_int_distribution<std::uint8_t> dist{0, 2};
+  std::uniform_int_distribution<std::uint32_t> dist{0, 1};
 
   for (std::uint32_t y = 0; y < field->height; ++y)
     for (std::uint32_t x = 0; x < field->width; ++x)
-      setCell(field, x, y, static_cast<State>(dist(rd)));
+      setCell(field, x, y, dist(rd));
 }
 
-void setCell(Field *field, std::uint32_t x, std::uint32_t y, State state)
+void setCell(Field *field, std::uint32_t x, std::uint32_t y, bool is_alive)
 {
   if (field == nullptr)
     return;
 
-  field->field[y * field->width + x] = state;
+  field->field[y * field->width + x] = is_alive;
 }
 
-State getCell(Field *field, std::int64_t x, std::int64_t y)
+bool getCell(Field *field, std::int64_t x, std::int64_t y)
 {
   if (field == nullptr)
-    return State::DEAD;
+    return false;
 
   x = (x + field->width) % field->width;
   y = (y + field->height) % field->height;
@@ -64,34 +63,29 @@ void drawField(Field *field)
 
   for (std::uint32_t y = 0; y < field->height; ++y)
     for (std::uint32_t x = 0; x < field->width; ++x)
-      putPixel(x, y, getCell(field, x, y));
+      if (getCell(field, x, y))
+        graph::putPixel(x, y, 255, 0, 0);
+      else
+        graph::putPixel(x, y, 0, 0, 255);
 }
 
-std::uint8_t getNeighbours(Field *field, std::uint32_t x, std::uint32_t y, State *newborn)
+std::uint8_t getNeighbours(Field *field, std::uint32_t x, std::uint32_t y)
 {
-  if (field == nullptr || newborn == nullptr)
+  if (field == nullptr)
     return 0;
 
   auto ix = static_cast<std::int64_t>(x);
   auto iy = static_cast<std::int64_t>(y);
 
-  std::uint8_t num_neigh = 0;
-  int newborn_cnt = 0;
+  std::uint8_t num_neigh = getCell(field, ix - 1, iy - 1);
 
-  for (std::int64_t i = -1; i <= 1; ++i)
-    for (std::int64_t j = -1; j <= 1; ++j)
-    {
-      if (i == 0 && j == 0)
-        continue;
-
-      auto state = getCell(field, ix + i, iy + j);
-      if (state == State::DEAD || ++num_neigh > 3)
-        continue;
-
-      newborn_cnt += state == State::ALIVE1 ? 1 : -1;
-    }
-
-  *newborn = newborn_cnt > 0 ? State::ALIVE1 : State::ALIVE2;
+  num_neigh += getCell(field, ix, iy - 1);
+  num_neigh += getCell(field, ix + 1, iy - 1);
+  num_neigh += getCell(field, ix + 1, iy);
+  num_neigh += getCell(field, ix + 1, iy + 1);
+  num_neigh += getCell(field, ix, iy + 1);
+  num_neigh += getCell(field, ix - 1, iy + 1);
+  num_neigh += getCell(field, ix - 1, iy);
 
   return num_neigh;
 }
@@ -104,18 +98,16 @@ void newGeneration(Field *cur, Field *next)
   for (std::uint32_t y = 0; y < cur->height; ++y)
     for (std::uint32_t x = 0; x < cur->width; ++x)
     {
-      State newborn = State::DEAD, new_state = State::DEAD, cur_state = getCell(cur, x, y);
-      auto num_neigh = getNeighbours(cur, x, y, &newborn);
+      auto num_neigh = getNeighbours(cur, x, y);
 
-      if (cur_state != State::DEAD)
-      {
-        if (num_neigh == 2 || num_neigh == 3)
-          new_state = cur_state;
-      }
-      else if (num_neigh == 3)
-        new_state = newborn;
+      bool is_alive = false;
 
-      setCell(next, x, y, new_state);
+      if (getCell(cur, x, y))
+        is_alive = num_neigh == 2 || num_neigh == 3;
+      else
+        is_alive = num_neigh == 3;
+
+      setCell(next, x, y, is_alive);
     }
 }
 
@@ -128,26 +120,5 @@ void destroyField(Field *field)
   delete[] field->field;
 
   field->field = nullptr;
-}
-
-void putPixel(std::uint32_t x, std::uint32_t y, State state)
-{
-  struct Color
-  {
-    std::uint8_t r, g, b;
-  } col = {0, 0, 0};
-
-  switch (state)
-  {
-  case State::ALIVE1:
-    col = {0, 0, 255};
-    break;
-  case State::ALIVE2:
-    col = {255, 0, 0};
-  default:
-    break;
-  }
-
-  graph::putPixel(x, y, col.r, col.g, col.b);
 }
 } // namespace life

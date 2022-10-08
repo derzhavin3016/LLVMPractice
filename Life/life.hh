@@ -28,6 +28,6 @@ std::uint8_t getNeighbours(Field *field, std::uint32_t x, std::uint32_t y);
 void newGeneration(Field *cur, Field *next);
 
 void drawField(Field *field);
-}
+} // namespace life
 
 #endif // __LIFE_H__

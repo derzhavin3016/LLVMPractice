@@ -64,9 +64,9 @@ void drawField(Field *field)
   for (std::uint32_t y = 0; y < field->height; ++y)
     for (std::uint32_t x = 0; x < field->width; ++x)
       if (getCell(field, x, y))
-        graph::putPixel(x, y, 255, 0, 0);
+        graph::putPixel(x, y, 0, 255, 0);
       else
-        graph::putPixel(x, y, 0, 0, 255);
+        graph::putPixel(x, y, 0, 0, 0);
 }
 
 std::uint8_t getNeighbours(Field *field, std::uint32_t x, std::uint32_t y)

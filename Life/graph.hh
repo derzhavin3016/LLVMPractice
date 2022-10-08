@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <cstddef>
+#include <sstream>
 
 namespace graph
 {

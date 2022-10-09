@@ -8,7 +8,7 @@
 bool *pActiveField = 0;
 bool *pNextField = 0;
 
-static bool getCell(int64_t x, int64_t y)
+bool getCell(int64_t x, int64_t y)
 {
   x = (x + FIELD_WIDTH) % FIELD_WIDTH;
   y = (y + FIELD_HEIGHT) % FIELD_HEIGHT;
@@ -16,14 +16,14 @@ static bool getCell(int64_t x, int64_t y)
   return ACCESS_FIELD(pActiveField, x, y);
 }
 
-static void fillField(void)
+void fillField(void)
 {
   for (uint32_t y = 0; y < FIELD_HEIGHT; ++y)
     for (uint32_t x = 0; x < FIELD_WIDTH; ++x)
       ACCESS_FIELD(pActiveField, x, y) = genRandomBool();
 }
 
-static uint8_t getNeighbours(uint32_t x, uint32_t y)
+uint8_t getNeighbours(uint32_t x, uint32_t y)
 {
   int64_t ix = (int64_t)x;
   int64_t iy = (int64_t)y;
@@ -42,7 +42,7 @@ static uint8_t getNeighbours(uint32_t x, uint32_t y)
   return num_neigh;
 }
 
-static void newGeneration(void)
+void newGeneration(void)
 {
   for (uint32_t y = 0; y < FIELD_HEIGHT; ++y)
     for (uint32_t x = 0; x < FIELD_WIDTH; ++x)
@@ -60,7 +60,7 @@ static void newGeneration(void)
     }
 }
 
-static void drawField(void)
+void drawField(void)
 {
   for (uint32_t y = 0; y < FIELD_HEIGHT; ++y)
     for (uint32_t x = 0; x < FIELD_WIDTH; ++x)
@@ -70,7 +70,7 @@ static void drawField(void)
         putPixel(x, y, 0, 0, 0);
 }
 
-static void swapActiveField(void)
+void swapActiveField(void)
 {
   bool *tmp = pActiveField;
   pActiveField = pNextField;

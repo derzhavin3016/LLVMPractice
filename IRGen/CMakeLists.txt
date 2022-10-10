@@ -7,7 +7,7 @@ llvm_map_components_to_libnames(LLVM_LIBS core)
 
 add_executable(irgen main.cc)
 
-target_compile_options(irgen PUBLIC -Wall -Wextra -Wpedantic -O2)
+target_compile_options(irgen PUBLIC -Wall -Wextra -Wpedantic -Wno-unused-parameter -O2)
 target_compile_features(irgen PRIVATE cxx_std_20)
 
 target_include_directories(irgen PRIVATE ${LLVM_INCLUDE_DIRS})

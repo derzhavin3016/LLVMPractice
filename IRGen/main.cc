@@ -16,5 +16,7 @@ int main()
 
   gen.makeGetNeighbours();
 
+  gen.makeNewGeneration();
+
   gen.dump(std::cout);
 }

@@ -8,7 +8,11 @@ int main()
   // @pNextField = dso_local local_unnamed_addr global i8* null, align 8
   gen.makeGlobalPtr("pNextField");
 
+  gen.makeGenRandomBool();
+
   gen.makeGetCell();
+
+  gen.makeFillField();
 
   gen.dump(std::cout);
 }

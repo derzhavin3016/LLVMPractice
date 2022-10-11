@@ -14,5 +14,7 @@ int main()
 
   gen.makeFillField();
 
+  gen.makeGetNeighbours();
+
   gen.dump(std::cout);
 }

@@ -18,5 +18,9 @@ int main()
 
   gen.makeNewGeneration();
 
+  gen.makePutPixel();
+
+  gen.makeDrawField();
+
   gen.dump(std::cout);
 }

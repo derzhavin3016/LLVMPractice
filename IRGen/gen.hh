@@ -53,6 +53,7 @@ public:
   {
     auto *func = makeFuncDecl({builder.getInt64Ty(), builder.getInt64Ty()},
                               builder.getInt1Ty(), "getCell");
+    func->addRetAttr(llvm::Attribute::ZExt);
 
     auto *b2 = llvm::BasicBlock::Create(context, "", func);
     builder.SetInsertPoint(b2);
@@ -84,7 +85,8 @@ public:
 
   void makeGenRandomBool()
   {
-    makeVoidFuncDecl(builder.getInt1Ty(), "genRandomBool");
+    auto *fnc = makeVoidFuncDecl(builder.getInt1Ty(), "genRandomBool");
+    fnc->addRetAttr(llvm::Attribute::ZExt);
   }
 
   void makeFillField()
@@ -156,6 +158,7 @@ public:
   {
     auto *func = makeFuncDecl({builder.getInt32Ty(), builder.getInt32Ty()},
                               builder.getInt8Ty(), "getNeighbours");
+    func->addRetAttr(llvm::Attribute::ZExt);
     auto *mainBB = llvm::BasicBlock::Create(context, "", func);
     builder.SetInsertPoint(mainBB);
 
@@ -435,6 +438,127 @@ public:
     auto *i70 = builder.CreateICmpEQ(i69, builder.getInt64(400));
     // br i1 %70, label %16, label %19, !llvm.loop !16
     builder.CreateCondBr(i70, b16, b19);
+  }
+
+  void makePutPixel()
+  {
+    auto *func = makeFuncDecl({builder.getInt32Ty(), builder.getInt32Ty(),
+                               builder.getInt8Ty(), builder.getInt8Ty(),
+                               builder.getInt8Ty()},
+                              builder.getVoidTy(), "putPixel");
+
+    func->addParamAttr(2, llvm::Attribute::ZExt);
+    func->addParamAttr(3, llvm::Attribute::ZExt);
+    func->addParamAttr(4, llvm::Attribute::ZExt);
+  }
+
+  void makeDrawField()
+  {
+    auto *func = makeVoidFuncDecl(builder.getVoidTy(), "drawField");
+    auto *b0 = llvm::BasicBlock::Create(context, "", func);
+    auto *b1 = llvm::BasicBlock::Create(context, "", func);
+    auto *b8 = llvm::BasicBlock::Create(context, "", func);
+    auto *b9 = llvm::BasicBlock::Create(context, "", func);
+    auto *b12 = llvm::BasicBlock::Create(context, "", func);
+    auto *b23 = llvm::BasicBlock::Create(context, "", func);
+    auto *b24 = llvm::BasicBlock::Create(context, "", func);
+    auto *b25 = llvm::BasicBlock::Create(context, "", func);
+
+    builder.SetInsertPoint(b0);
+    builder.CreateBr(b1);
+
+    builder.SetInsertPoint(b1);
+
+    // %2 = phi i64 [ 0, %0 ], [ %10, %9 ]
+    auto *i2 = builder.CreatePHI(builder.getInt64Ty(), 2);
+    i2->addIncoming(builder.getInt64(0), b0);
+    // %3 = add nuw nsw i64 %2, 400
+    auto *i3 = builder.CreateAdd(i2, builder.getInt64(400), "", true, true);
+    // %4 = urem i64 %3, 400
+    auto *i4 = builder.CreateURem(i3, builder.getInt64(400));
+    // %5 = mul nuw nsw i64 %4, 400
+    auto *i5 = builder.CreateMul(i4, builder.getInt64(400), "", true, true);
+    // %6 = trunc i64 %2 to i32
+    auto *i6 = builder.CreateTrunc(i2, builder.getInt32Ty());
+    // %7 = trunc i64 %2 to i32
+    auto *i7 = builder.CreateTrunc(i2, builder.getInt32Ty());
+    // br label %12
+    builder.CreateBr(b12);
+
+    builder.SetInsertPoint(b8);
+    // ret void
+    builder.CreateRetVoid();
+
+    builder.SetInsertPoint(b9);
+    // %10 = add nuw nsw i64 %2, 1
+    auto *i10 = builder.CreateAdd(i2, builder.getInt64(1), "", true, true);
+    i2->addIncoming(i10, b9);
+    // %11 = icmp eq i64 %10, 400
+    auto *i11 = builder.CreateICmpEQ(i10, builder.getInt64(400));
+    // br i1 %11, label %8, label %1, !llvm.loop !17
+    builder.CreateCondBr(i11, b8, b1);
+
+    builder.SetInsertPoint(b12);
+    // %13 = phi i32 [ 0, %1 ], [ %26, %25 ]
+    auto *i13 = builder.CreatePHI(builder.getInt32Ty(), 2);
+    i13->addIncoming(builder.getInt32(0), b1);
+    // %14 = trunc i32 %13 to i16
+    auto *i14 = builder.CreateTrunc(i13, builder.getInt16Ty());
+    // %15 = add i16 %14, 400
+    auto *i15 = builder.CreateAdd(i14, builder.getInt16(400));
+    // %16 = urem i16 %15, 400
+    auto *i16 = builder.CreateURem(i15, builder.getInt16(400));
+    // %17 = zext i16 %16 to i64
+    auto *i17 = builder.CreateZExt(i16, builder.getInt64Ty());
+    // %18 = load i8*, i8** @pActiveField, align 8, !tbaa !5
+    auto *i18 =
+      builder.CreateLoad(builder.getInt8PtrTy(), getGlobVar("pActiveField"));
+    // %19 = add nuw nsw i64 %5, %17
+    auto *i19 = builder.CreateAdd(i5, i17, "", true, true);
+    // %20 = getelementptr inbounds i8, i8* %18, i64 %19
+    auto *i20 = builder.CreateGEP(builder.getInt8Ty(), i18, i19);
+    // %21 = load i8, i8* %20, align 1, !tbaa !9, !range !11
+    auto *i21 = builder.CreateLoad(builder.getInt8Ty(), i20);
+    // %22 = icmp eq i8 %21, 0
+    auto *i22 = builder.CreateICmpEQ(i21, builder.getInt8(0));
+    // br i1 %22, label %24, label %23
+    builder.CreateCondBr(i22, b24, b23);
+
+    builder.SetInsertPoint(b23);
+    // tail call void @putPixel(i32 noundef %13, i32 noundef %6, i8 noundef
+    // zeroext 0, i8 noundef zeroext -1, i8 noundef zeroext 0) #7
+    auto *call = builder.CreateCall(
+      getFunc("putPixel"),
+      {i13, i6, builder.getInt8(0), builder.getInt8(-1), builder.getInt8(0)});
+
+    call->addParamAttr(2, llvm::Attribute::ZExt);
+    call->addParamAttr(3, llvm::Attribute::ZExt);
+    call->addParamAttr(4, llvm::Attribute::ZExt);
+    // br label %25
+    builder.CreateBr(b25);
+
+    builder.SetInsertPoint(b24);
+    // tail call void @putPixel(i32 noundef %13, i32 noundef %7, i8 noundef
+    // zeroext 0, i8 noundef zeroext 0, i8 noundef zeroext 0) #7
+    auto *call2 = builder.CreateCall(
+      getFunc("putPixel"),
+      {i13, i7, builder.getInt8(0), builder.getInt8(0), builder.getInt8(0)});
+
+    call2->addParamAttr(2, llvm::Attribute::ZExt);
+    call2->addParamAttr(3, llvm::Attribute::ZExt);
+    call2->addParamAttr(4, llvm::Attribute::ZExt);
+
+    // br label %25
+    builder.CreateBr(b25);
+
+    builder.SetInsertPoint(b25);
+    // %26 = add nuw nsw i32 %13, 1
+    auto *i26 = builder.CreateAdd(i13, builder.getInt32(1), "", true, true);
+    i13->addIncoming(i26, b25);
+    // %27 = icmp eq i32 %26, 400
+    auto *i27 = builder.CreateICmpEQ(i26, builder.getInt32(400));
+    // br i1 %27, label %9, label %12
+    builder.CreateCondBr(i27, b9, b12);
   }
 
   void dump(std::ostream &ost) const

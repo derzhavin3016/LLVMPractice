@@ -11,7 +11,7 @@ target_compile_options(irgen PUBLIC -Wall -Wextra -Wpedantic -Wno-unused-paramet
 target_compile_features(irgen PRIVATE cxx_std_20)
 
 target_include_directories(irgen PRIVATE ${LLVM_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/..)
-target_link_libraries(irgen PRIVATE ${LLVM_LIBS})
+target_link_libraries(irgen PRIVATE ${LLVM_LIBS} GraphLib)
 target_compile_definitions(irgen PRIVATE ${LLVM_DEFINITIONS})
 
 set_target_properties(irgen

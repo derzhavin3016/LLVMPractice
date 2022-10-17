@@ -19,9 +19,11 @@ public:
 
     gen.generateIR();
 
-    gen.dump(std::cout);
+    // gen.dump(std::cout);
 
+    std::cout << "[RUNNING]\n";
     irrun::Runner runner(std::move(pModule));
+    std::cout << "[WAS RUN]\n";
   }
 };
 } // namespace ircont

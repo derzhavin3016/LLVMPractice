@@ -21,8 +21,9 @@ public:
 
     // gen.dump(std::cout);
 
-    std::cout << "[RUNNING]\n";
     irrun::Runner runner(std::move(pModule));
+    std::cout << "[RUNNING]\n";
+    runner.run();
     std::cout << "[WAS RUN]\n";
   }
 };

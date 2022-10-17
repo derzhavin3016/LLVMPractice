@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include "llvmbase.hh"
+#include "llvm/ExecutionEngine/Interpreter.h"
 
 #include "Life/graph.h"
 

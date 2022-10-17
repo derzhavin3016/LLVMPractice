@@ -31,12 +31,13 @@ void Generator::makeGetCell()
   // %7 = load i8*, i8** @pActiveField, align 8, !tbaa !5
   auto *i7 =
     builder.CreateLoad(builder.getInt8PtrTy(), getGlobVar("pActiveField"));
+  setAlignment(i7, 8);
   // %8 = mul nuw nsw i64 %6, 400
   auto *i8 = builder.CreateMul(i6, builder.getInt64(400), "", true, true);
   // %9 = add nuw nsw i64 %8, %4
   auto *i9 = builder.CreateAdd(i8, i4, "", true, true);
   // %10 = getelementptr inbounds i8, i8* %7, i64 %9
-  auto *i10 = builder.CreateGEP(builder.getInt8Ty(), i7, i9);
+  auto *i10 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i7, i9);
   // %11 = load i8, i8* %10, align 1, !tbaa !9, !range !11
   auto *i11 = builder.CreateLoad(builder.getInt8Ty(), i10);
   // %12 = icmp ne i8 %11, 0
@@ -100,10 +101,11 @@ void Generator::makeFillField()
   // %11 = load i8*, i8** @pActiveField, align 8, !tbaa !5
   auto *i11 =
     builder.CreateLoad(builder.getInt8PtrTy(), getGlobVar("pActiveField"));
+  setAlignment(i11, 8);
   // %12 = add nuw nsw i64 %3, %9
   auto *i12 = builder.CreateAdd(i3, i9, "", true, true);
   // %13 = getelementptr inbounds i8, i8* %11, i64 %12
-  auto *i13 = builder.CreateGEP(builder.getInt8Ty(), i11, i12);
+  auto *i13 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i11, i12);
   // %14 = zext i1 %10 to i8
   auto *i14 = builder.CreateZExt(i10, builder.getInt8Ty());
   // store i8 %14, i8* %13, align 1, !tbaa !9
@@ -140,12 +142,13 @@ void Generator::makeGetNeighbours()
   // %9 = load i8*, i8** @pActiveField, align 8, !tbaa !5
   auto *i9 =
     builder.CreateLoad(builder.getInt8PtrTy(), getGlobVar("pActiveField"));
+  setAlignment(i9, 8);
   // %10 = mul nuw nsw i64 %8, 400
   auto *i10 = builder.CreateMul(i8, builder.getInt64(400), "", true, true);
   // %11 = add nuw nsw i64 %10, %6
   auto *i11 = builder.CreateAdd(i10, i6, "", true, true);
   // %12 = getelementptr inbounds i8, i8* %9, i64 %11
-  auto *i12 = builder.CreateGEP(builder.getInt8Ty(), i9, i11);
+  auto *i12 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i9, i11);
   // %13 = load i8, i8* %12, align 1, !tbaa !9, !range !11
   auto *i13 = builder.CreateLoad(builder.getInt8Ty(), i12);
   // %14 = add nuw nsw i64 %3, 400
@@ -155,7 +158,7 @@ void Generator::makeGetNeighbours()
   // %16 = add nuw nsw i64 %10, %15
   auto *i16 = builder.CreateAdd(i10, i15, "", true, true);
   // %17 = getelementptr inbounds i8, i8* %9, i64 %16
-  auto *i17 = builder.CreateGEP(builder.getInt8Ty(), i9, i16);
+  auto *i17 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i9, i16);
   // %18 = load i8, i8* %17, align 1, !tbaa !9, !range !11
   auto *i18 = builder.CreateLoad(builder.getInt8Ty(), i17);
   // %19 = add nuw nsw i8 %18, %13
@@ -167,7 +170,7 @@ void Generator::makeGetNeighbours()
   // %22 = add nuw nsw i64 %10, %21
   auto *i22 = builder.CreateAdd(i10, i21, "", true, true);
   // %23 = getelementptr inbounds i8, i8* %9, i64 %22
-  auto *i23 = builder.CreateGEP(builder.getInt8Ty(), i9, i22);
+  auto *i23 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i9, i22);
   // %24 = load i8, i8* %23, align 1, !tbaa !9, !range !11
   auto *i24 = builder.CreateLoad(builder.getInt8Ty(), i23);
   // %25 = add nuw nsw i8 %19, %24
@@ -181,7 +184,7 @@ void Generator::makeGetNeighbours()
   // %29 = add nuw nsw i64 %28, %21
   auto *i29 = builder.CreateAdd(i28, i21, "", true, true);
   // %30 = getelementptr inbounds i8, i8* %9, i64 %29
-  auto *i30 = builder.CreateGEP(builder.getInt8Ty(), i9, i29);
+  auto *i30 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i9, i29);
   // %31 = load i8, i8* %30, align 1, !tbaa !9, !range !11
   auto *i31 = builder.CreateLoad(builder.getInt8Ty(), i30);
   // %32 = add nuw nsw i8 %25, %31
@@ -195,7 +198,7 @@ void Generator::makeGetNeighbours()
   // %36 = add nuw nsw i64 %35, %21
   auto *i36 = builder.CreateAdd(i35, i21, "", true, true);
   // %37 = getelementptr inbounds i8, i8* %9, i64 %36
-  auto *i37 = builder.CreateGEP(builder.getInt8Ty(), i9, i36);
+  auto *i37 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i9, i36);
   // %38 = load i8, i8* %37, align 1, !tbaa !9, !range !11
   auto *i38 = builder.CreateLoad(builder.getInt8Ty(), i37);
   // %39 = add nuw nsw i8 %32, %38
@@ -203,7 +206,7 @@ void Generator::makeGetNeighbours()
   // %40 = add nuw nsw i64 %35, %15
   auto *i40 = builder.CreateAdd(i35, i15, "", true, true);
   // %41 = getelementptr inbounds i8, i8* %9, i64 %40
-  auto *i41 = builder.CreateGEP(builder.getInt8Ty(), i9, i40);
+  auto *i41 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i9, i40);
   // %42 = load i8, i8* %41, align 1, !tbaa !9, !range !11
   auto *i42 = builder.CreateLoad(builder.getInt8Ty(), i41);
   // %43 = add nuw nsw i8 %39, %42
@@ -211,7 +214,7 @@ void Generator::makeGetNeighbours()
   // %44 = add nuw nsw i64 %35, %6
   auto *i44 = builder.CreateAdd(i35, i6, "", true, true);
   // %45 = getelementptr inbounds i8, i8* %9, i64 %44
-  auto *i45 = builder.CreateGEP(builder.getInt8Ty(), i9, i44);
+  auto *i45 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i9, i44);
   // %46 = load i8, i8* %45, align 1, !tbaa !9, !range !11
   auto *i46 = builder.CreateLoad(builder.getInt8Ty(), i45);
   // %47 = add nuw nsw i8 %43, %46
@@ -219,7 +222,7 @@ void Generator::makeGetNeighbours()
   // %48 = add nuw nsw i64 %28, %6
   auto *i48 = builder.CreateAdd(i28, i6, "", true, true);
   // %49 = getelementptr inbounds i8, i8* %9, i64 %48
-  auto *i49 = builder.CreateGEP(builder.getInt8Ty(), i9, i48);
+  auto *i49 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i9, i48);
   // %50 = load i8, i8* %49, align 1, !tbaa !9, !range !11
   auto *i50 = builder.CreateLoad(builder.getInt8Ty(), i49);
   // %51 = add nuw nsw i8 %47, %50
@@ -237,9 +240,11 @@ void Generator::makeNewGeneration()
   // %1 = load i8*, i8** @pActiveField, align 8, !tbaa !5
   auto *i1 =
     builder.CreateLoad(builder.getInt8PtrTy(), getGlobVar("pActiveField"));
+  setAlignment(i1, 8);
   // %2 = load i8*, i8** @pNextField, align 8, !tbaa !5
   auto *i2 =
     builder.CreateLoad(builder.getInt8PtrTy(), getGlobVar("pNextField"));
+  setAlignment(i2, 8);
   // br label %3
   auto *b3 = llvm::BasicBlock::Create(context, "", func);
   builder.CreateBr(b3);
@@ -302,7 +307,7 @@ void Generator::makeNewGeneration()
   // %23 = add nuw nsw i64 %22, %7
   auto *i23 = builder.CreateAdd(i22, i7, "", true, true);
   // %24 = getelementptr inbounds i8, i8* %1, i64 %23
-  auto *i24 = builder.CreateGEP(builder.getInt8Ty(), i1, i23);
+  auto *i24 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i1, i23);
   // %25 = load i8, i8* %24, align 1, !tbaa !9, !range !11
   auto *i25 = builder.CreateLoad(builder.getInt8Ty(), i24);
   // %26 = add nuw nsw i64 %20, 400
@@ -312,12 +317,11 @@ void Generator::makeNewGeneration()
   // %28 = add nuw nsw i64 %27, %7
   auto *i28 = builder.CreateAdd(i27, i7, "", true, true);
   // %29 = getelementptr inbounds i8, i8* %1, i64 %28
-  auto *i29 = builder.CreateGEP(builder.getInt8Ty(), i1, i28);
+  auto *i29 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i1, i28);
   // %30 = load i8, i8* %29, align 1, !tbaa !9, !range !11
   auto *i30 = builder.CreateLoad(builder.getInt8Ty(), i29);
   // %31 = add nuw nsw i8 %30, %25
   auto *i31 = builder.CreateAdd(i30, i25, "", true, true);
-  ;
   // %32 = add nuw nsw i64 %20, 401
   auto *i32 = builder.CreateAdd(i20, builder.getInt64(401), "", true, true);
   // %33 = urem i64 %32, 400
@@ -325,7 +329,7 @@ void Generator::makeNewGeneration()
   // %34 = add nuw nsw i64 %33, %7
   auto *i34 = builder.CreateAdd(i33, i7, "", true, true);
   // %35 = getelementptr inbounds i8, i8* %1, i64 %34
-  auto *i35 = builder.CreateGEP(builder.getInt8Ty(), i1, i34);
+  auto *i35 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i1, i34);
   // %36 = load i8, i8* %35, align 1, !tbaa !9, !range !11
   auto *i36 = builder.CreateLoad(builder.getInt8Ty(), i35);
   // %37 = add nuw nsw i8 %31, %36
@@ -333,7 +337,7 @@ void Generator::makeNewGeneration()
   // %38 = add nuw nsw i64 %33, %10
   auto *i38 = builder.CreateAdd(i33, i10, "", true, true);
   // %39 = getelementptr inbounds i8, i8* %1, i64 %38
-  auto *i39 = builder.CreateGEP(builder.getInt8Ty(), i1, i38);
+  auto *i39 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i1, i38);
   // %40 = load i8, i8* %39, align 1, !tbaa !9, !range !11
   auto *i40 = builder.CreateLoad(builder.getInt8Ty(), i39);
   // %41 = add nuw nsw i8 %37, %40
@@ -341,7 +345,7 @@ void Generator::makeNewGeneration()
   // %42 = add nuw nsw i64 %33, %13
   auto *i42 = builder.CreateAdd(i33, i13, "", true, true);
   // %43 = getelementptr inbounds i8, i8* %1, i64 %42
-  auto *i43 = builder.CreateGEP(builder.getInt8Ty(), i1, i42);
+  auto *i43 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i1, i42);
   // %44 = load i8, i8* %43, align 1, !tbaa !9, !range !11
   auto *i44 = builder.CreateLoad(builder.getInt8Ty(), i43);
   // %45 = add nuw nsw i8 %41, %44
@@ -349,7 +353,7 @@ void Generator::makeNewGeneration()
   // %46 = add nuw nsw i64 %27, %13
   auto *i46 = builder.CreateAdd(i27, i13, "", true, true);
   // %47 = getelementptr inbounds i8, i8* %1, i64 %46
-  auto *i47 = builder.CreateGEP(builder.getInt8Ty(), i1, i46);
+  auto *i47 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i1, i46);
   // %48 = load i8, i8* %47, align 1, !tbaa !9, !range !11
   auto *i48 = builder.CreateLoad(builder.getInt8Ty(), i47);
   // %49 = add nuw nsw i8 %45, %48
@@ -357,7 +361,7 @@ void Generator::makeNewGeneration()
   // %50 = add nuw nsw i64 %22, %13
   auto *i50 = builder.CreateAdd(i22, i13, "", true, true);
   // %51 = getelementptr inbounds i8, i8* %1, i64 %50
-  auto *i51 = builder.CreateGEP(builder.getInt8Ty(), i1, i50);
+  auto *i51 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i1, i50);
   // %52 = load i8, i8* %51, align 1, !tbaa !9, !range !11
   auto *i52 = builder.CreateLoad(builder.getInt8Ty(), i51);
   // %53 = add nuw nsw i8 %49, %52
@@ -365,7 +369,7 @@ void Generator::makeNewGeneration()
   // %54 = add nuw nsw i64 %22, %10
   auto *i54 = builder.CreateAdd(i22, i10, "", true, true);
   // %55 = getelementptr inbounds i8, i8* %1, i64 %54
-  auto *i55 = builder.CreateGEP(builder.getInt8Ty(), i1, i54);
+  auto *i55 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i1, i54);
   // %56 = load i8, i8* %55, align 1, !tbaa !9, !range !11
   auto *i56 = builder.CreateLoad(builder.getInt8Ty(), i55);
   // %57 = add nuw nsw i8 %53, %56
@@ -373,7 +377,7 @@ void Generator::makeNewGeneration()
   // %58 = add nuw nsw i64 %27, %10
   auto *i58 = builder.CreateAdd(i27, i10, "", true, true);
   // %59 = getelementptr inbounds i8, i8* %1, i64 %58
-  auto *i59 = builder.CreateGEP(builder.getInt8Ty(), i1, i58);
+  auto *i59 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i1, i58);
   // %60 = load i8, i8* %59, align 1, !tbaa !9, !range !11
   auto *i60 = builder.CreateLoad(builder.getInt8Ty(), i59);
   // %61 = icmp eq i8 %60, 0
@@ -389,7 +393,7 @@ void Generator::makeNewGeneration()
   // %66 = add nuw nsw i64 %20, %14
   auto *i66 = builder.CreateAdd(i20, i14, "", true, true);
   // %67 = getelementptr inbounds i8, i8* %2, i64 %66
-  auto *i67 = builder.CreateGEP(builder.getInt8Ty(), i2, i66);
+  auto *i67 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i2, i66);
   // %68 = zext i1 %65 to i8
   auto *i68 = builder.CreateZExt(i65, builder.getInt8Ty());
   // store i8 %68, i8* %67, align 1, !tbaa !9
@@ -476,10 +480,11 @@ void Generator::makeDrawField()
   // %18 = load i8*, i8** @pActiveField, align 8, !tbaa !5
   auto *i18 =
     builder.CreateLoad(builder.getInt8PtrTy(), getGlobVar("pActiveField"));
+  setAlignment(i18, 8);
   // %19 = add nuw nsw i64 %5, %17
   auto *i19 = builder.CreateAdd(i5, i17, "", true, true);
   // %20 = getelementptr inbounds i8, i8* %18, i64 %19
-  auto *i20 = builder.CreateGEP(builder.getInt8Ty(), i18, i19);
+  auto *i20 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i18, i19);
   // %21 = load i8, i8* %20, align 1, !tbaa !9, !range !11
   auto *i21 = builder.CreateLoad(builder.getInt8Ty(), i20);
   // %22 = icmp eq i8 %21, 0
@@ -531,17 +536,261 @@ void Generator::makeSwapActiveField()
   auto *func = makeVoidFuncDecl(builder.getVoidTy(), "swapActiveField");
   auto *b0 = llvm::BasicBlock::Create(context, "", func);
   builder.SetInsertPoint(b0);
+  auto *active = getGlobVar("pActiveField");
+  auto *next = getGlobVar("pNextField");
 
   // %1 = load i8*, i8** @pActiveField, align 8, !tbaa !5
-  auto *i1 =
-    builder.CreateLoad(builder.getInt8PtrTy(), getGlobVar("pActiveField"));
+  auto *i1 = builder.CreateLoad(builder.getInt8PtrTy(), active);
   setAlignment(i1, 8);
   // %2 = load i8*, i8** @pNextField, align 8, !tbaa !5
-  auto *i2 =
-    builder.CreateLoad(builder.getInt8PtrTy(), getGlobVar("pNextField"));
+  auto *i2 = builder.CreateLoad(builder.getInt8PtrTy(), next);
+  setAlignment(i2, 8);
   // store i8* %2, i8** @pActiveField, align 8, !tbaa !5
+  auto *storeActive = builder.CreateStore(i2, active);
+  setAlignment(storeActive, 8);
   // store i8* %1, i8** @pNextField, align 8, !tbaa !5
+  auto *storeNext = builder.CreateStore(i1, next);
+  setAlignment(storeNext, 8);
   // ret void
+  builder.CreateRetVoid();
+}
+
+void Generator::makeMain()
+{
+  auto *func = makeVoidFuncDecl(builder.getInt32Ty(), "main");
+  auto *b0 = llvm::BasicBlock::Create(context, "", func);
+  auto *b5 = llvm::BasicBlock::Create(context, "", func);
+  auto *b8 = llvm::BasicBlock::Create(context, "", func);
+  auto *b11 = llvm::BasicBlock::Create(context, "", func);
+  auto *b13 = llvm::BasicBlock::Create(context, "", func);
+  auto *b22 = llvm::BasicBlock::Create(context, "", func);
+  auto *b23 = llvm::BasicBlock::Create(context, "", func);
+  auto *b29 = llvm::BasicBlock::Create(context, "", func);
+  auto *b32 = llvm::BasicBlock::Create(context, "", func);
+  auto *b45 = llvm::BasicBlock::Create(context, "", func);
+  auto *b49 = llvm::BasicBlock::Create(context, "", func);
+
+  builder.SetInsertPoint(b0);
+  auto *arrayType = llvm::ArrayType::get(builder.getInt8Ty(), 160000);
+  // %1 = alloca [160000 x i8], align 16
+  auto *i1 = builder.CreateAlloca(arrayType);
+  setAlignment(i1, 16);
+  // %2 = alloca [160000 x i8], align 16
+  auto *i2 = builder.CreateAlloca(arrayType);
+  setAlignment(i2, 16);
+  // %3 = getelementptr inbounds [160000 x i8], [160000 x i8]* %1, i64 0, i64 0
+  auto *i3 = builder.CreateInBoundsGEP(
+    arrayType, i1, {builder.getInt64(0), builder.getInt64(0)});
+  // call void @llvm.lifetime.start.p0i8(i64 160000, i8* nonnull %3) #7
+  // call void @llvm.memset.p0i8.i64(i8* noundef nonnull align 16
+  // dereferenceable(160000) %3, i8 0, i64 160000, i1 false)
+
+  // %4 = getelementptr inbounds [160000 x i8], [160000 x i8]* %2, i64 0, i64 0
+  auto *i4 = builder.CreateInBoundsGEP(
+    arrayType, i2, {builder.getInt64(0), builder.getInt64(0)});
+  // call void @llvm.lifetime.start.p0i8(i64 160000, i8* nonnull %4) #7
+  // call void @llvm.memset.p0i8.i64(i8* noundef nonnull align 16
+  // dereferenceable(160000) %4, i8 0, i64 160000, i1 false)
+
+  // store i8* %3, i8** @pActiveField, align 8, !tbaa !5
+  setAlignment(builder.CreateStore(i3, getGlobVar("pActiveField")), 8);
+  // store i8* %4, i8** @pNextField, align 8, !tbaa !5
+  setAlignment(builder.CreateStore(i4, getGlobVar("pNextField")), 8);
+  // call void @createWindow(i32 noundef 400, i32 noundef 400) #7
+  builder.CreateCall(getFunc("createWindow"),
+                     {builder.getInt32(400), builder.getInt32(400)});
+  // br label %5
+  builder.CreateBr(b5);
+
+  builder.SetInsertPoint(b5);
+  // %6 = phi i64 [ 0, %0 ], [ %9, %8 ]
+  auto *i6 = builder.CreatePHI(builder.getInt64Ty(), 2);
+  i6->addIncoming(builder.getInt64(0), b0);
+  // %7 = mul nuw nsw i64 %6, 400
+  auto *i7 = builder.CreateMul(i6, builder.getInt64(400), "", true, true);
+  // br label %13
+  builder.CreateBr(b13);
+
+  builder.SetInsertPoint(b8);
+  // %9 = add nuw nsw i64 %6, 1
+  auto *i9 = builder.CreateAdd(i6, builder.getInt64(1), "", true, true);
+  i6->addIncoming(i9, b8);
+  // %10 = icmp eq i64 %9, 400
+  auto *i10 = builder.CreateICmpEQ(i9, builder.getInt64(400));
+  // br i1 %10, label %11, label %5, !llvm.loop !12
+  builder.CreateCondBr(i10, b11, b5);
+
+  builder.SetInsertPoint(b11);
+  // %12 = call zeroext i1 @isWindowOpen() #7
+  auto *i12 = builder.CreateCall(getFunc("isWindowOpen"));
+  i12->addRetAttr(llvm::Attribute::ZExt);
+  // br i1 %12, label %22, label %49
+  builder.CreateCondBr(i12, b22, b49);
+
+  builder.SetInsertPoint(b13);
+  // %14 = phi i64 [ 0, %5 ], [ %20, %13 ]
+  auto *i14 = builder.CreatePHI(builder.getInt64Ty(), 2);
+  i14->addIncoming(builder.getInt64(0), b5);
+  // %15 = call zeroext i1 @genRandomBool() #7
+  auto *i15 = builder.CreateCall(getFunc("genRandomBool"));
+  i15->addRetAttr(llvm::Attribute::ZExt);
+  // %16 = load i8*, i8** @pActiveField, align 8, !tbaa !5
+  auto *i16 =
+    builder.CreateLoad(builder.getInt8PtrTy(), getGlobVar("pActiveField"));
+  setAlignment(i16, 8);
+  // %17 = add nuw nsw i64 %14, %7
+  auto *i17 = builder.CreateAdd(i14, i7, "", true, true);
+  // %18 = getelementptr inbounds i8, i8* %16, i64 %17
+  auto *i18 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i16, i17);
+  // %19 = zext i1 %15 to i8
+  auto *i19 = builder.CreateZExt(i15, builder.getInt8Ty());
+  // store i8 %19, i8* %18, align 1, !tbaa !9
+  builder.CreateStore(i19, i18);
+  // %20 = add nuw nsw i64 %14, 1
+  auto *i20 = builder.CreateAdd(i14, builder.getInt64(1), "", true, true);
+  i14->addIncoming(i20, b13);
+  // %21 = icmp eq i64 %20, 400
+  auto *i21 = builder.CreateICmpEQ(i20, builder.getInt64(400));
+  // br i1 %21, label %8, label %13, !llvm.loop !14
+  builder.CreateCondBr(i21, b8, b13);
+
+  builder.SetInsertPoint(b22);
+  // call void @handleEvents() #7
+  builder.CreateCall(getFunc("handleEvents"));
+  // call void @clearWindow(i8 noundef zeroext 0, i8 noundef zeroext 0, i8
+  // noundef zeroext 0) #7
+  auto *zeroInt8 = builder.getInt8(0);
+  auto *clearCall =
+    builder.CreateCall(getFunc("clearWindow"), {zeroInt8, zeroInt8, zeroInt8});
+  clearCall->addParamAttr(0, llvm::Attribute::ZExt);
+  clearCall->addParamAttr(1, llvm::Attribute::ZExt);
+  clearCall->addParamAttr(2, llvm::Attribute::ZExt);
+  // call void @newGeneration()
+  builder.CreateCall(getFunc("newGeneration"));
+  // br label %23
+  builder.CreateBr(b23);
+
+  builder.SetInsertPoint(b23);
+  // %24 = phi i64 [ 0, %22 ], [ %30, %29 ]
+  auto *i24 = builder.CreatePHI(builder.getInt64Ty(), 2);
+  i24->addIncoming(builder.getInt64(0), b22);
+  // %25 = add nuw nsw i64 %24, 400
+  auto *i25 = builder.CreateAdd(i24, builder.getInt64(400), "", true, true);
+  // %26 = urem i64 %25, 400
+  auto *i26 = builder.CreateURem(i25, builder.getInt64(400));
+  // %27 = mul nuw nsw i64 %26, 400
+  auto *i27 = builder.CreateMul(i26, builder.getInt64(400), "", true, true);
+  // %28 = trunc i64 %24 to i32
+  auto *i28 = builder.CreateTrunc(i24, builder.getInt32Ty());
+  // br label %32
+  builder.CreateBr(b32);
+
+  builder.SetInsertPoint(b29);
+  // %30 = add nuw nsw i64 %24, 1
+  auto *i30 = builder.CreateAdd(i24, builder.getInt64(1), "", true, true);
+  i24->addIncoming(i30, b29);
+  // %31 = icmp eq i64 %30, 400
+  auto *i31 = builder.CreateICmpEQ(i30, builder.getInt64(400));
+  // br i1 %31, label %45, label %23, !llvm.loop !17
+  builder.CreateCondBr(i31, b45, b23);
+
+  builder.SetInsertPoint(b32);
+
+  // %33 = phi i32 [ 0, %23 ], [ %43, %32 ]
+  auto *i33 = builder.CreatePHI(builder.getInt32Ty(), 2);
+  i33->addIncoming(builder.getInt32(0), b23);
+  // %34 = trunc i32 %33 to i16
+  auto *i34 = builder.CreateTrunc(i33, builder.getInt16Ty());
+  // %35 = add i16 %34, 400
+  auto *i35 = builder.CreateAdd(i34, builder.getInt16(400));
+  // %36 = urem i16 %35, 400
+  auto *i36 = builder.CreateURem(i35, builder.getInt16(400));
+  // %37 = zext i16 %36 to i64
+  auto *i37 = builder.CreateZExt(i36, builder.getInt64Ty());
+  // %38 = load i8*, i8** @pActiveField, align 8, !tbaa !5
+  auto *i38 =
+    builder.CreateLoad(builder.getInt8PtrTy(), getGlobVar("pActiveField"));
+  setAlignment(i38, 8);
+  // %39 = add nuw nsw i64 %27, %37
+  auto *i39 = builder.CreateAdd(i27, i37, "", true, true);
+  // %40 = getelementptr inbounds i8, i8* %38, i64 %39
+  auto *i40 = builder.CreateInBoundsGEP(builder.getInt8Ty(), i38, i39);
+  // %41 = load i8, i8* %40, align 1, !tbaa !9, !range !11
+  auto *i41 = builder.CreateLoad(builder.getInt8Ty(), i40);
+  // %42 = sub nsw i8 0, %41
+  auto *i42 = builder.CreateSub(zeroInt8, i41, "", false, true);
+  // call void @putPixel(i32 noundef %33, i32 noundef %28, i8 noundef zeroext 0,
+  // i8 noundef zeroext %42, i8 noundef zeroext 0) #7
+  auto *pupiCall = builder.CreateCall(getFunc("putPixel"),
+                                      {i33, i28, zeroInt8, i42, zeroInt8});
+  pupiCall->addParamAttr(2, llvm::Attribute::ZExt);
+  pupiCall->addParamAttr(3, llvm::Attribute::ZExt);
+  pupiCall->addParamAttr(4, llvm::Attribute::ZExt);
+  // %43 = add nuw nsw i32 %33, 1
+  auto *i43 = builder.CreateAdd(i33, builder.getInt32(1), "", true, true);
+  i33->addIncoming(i43, b32);
+  // %44 = icmp eq i32 %43, 400
+  auto *i44 = builder.CreateICmpEQ(i43, builder.getInt32(400));
+  // br i1 %44, label %29, label %32, !llvm.loop !18
+  builder.CreateCondBr(i44, b29, b32);
+
+  builder.SetInsertPoint(b45);
+  // %46 = load i8*, i8** @pActiveField, align 8, !tbaa !5
+  auto *i46 =
+    builder.CreateLoad(builder.getInt8PtrTy(), getGlobVar("pActiveField"));
+  setAlignment(i46, 8);
+  // %47 = load i8*, i8** @pNextField, align 8, !tbaa !5
+  auto *i47 =
+    builder.CreateLoad(builder.getInt8PtrTy(), getGlobVar("pNextField"));
+  setAlignment(i47, 8);
+  // store i8* %47, i8** @pActiveField, align 8, !tbaa !5
+  setAlignment(builder.CreateStore(i47, getGlobVar("pActiveField")), 8);
+  // store i8* %46, i8** @pNextField, align 8, !tbaa !5
+  setAlignment(builder.CreateStore(i46, getGlobVar("pNextField")), 8);
+  // call void @flushWindow() #7
+  builder.CreateCall(getFunc("flushWindow"));
+  // %48 = call zeroext i1 @isWindowOpen() #7
+  auto *i48 = builder.CreateCall(getFunc("isWindowOpen"));
+  i48->addRetAttr(llvm::Attribute::ZExt);
+  // br i1 %48, label %22, label %49, !llvm.loop !19
+  builder.CreateCondBr(i48, b22, b49);
+
+  builder.SetInsertPoint(b49);
+  // call void @llvm.lifetime.end.p0i8(i64 160000, i8* nonnull %4) #7
+  // call void @llvm.lifetime.end.p0i8(i64 160000, i8* nonnull %3) #7
+
+  // ret i32 0
+  builder.CreateRet(builder.getInt32(0));
+}
+
+void Generator::makeIsWindowOpen()
+{
+  makeVoidFuncDecl(builder.getInt1Ty(), "isWindowOpen")
+    ->addRetAttr(llvm::Attribute::ZExt);
+}
+
+void Generator::makeCreateWindow()
+{
+  makeFuncDecl({builder.getInt32Ty(), builder.getInt32Ty()},
+               builder.getVoidTy(), "createWindow");
+}
+
+void Generator::makeHandleEvents()
+{
+  makeVoidFuncDecl(builder.getVoidTy(), "handleEvents");
+}
+void Generator::makeClearWindow()
+{
+  auto *func = makeFuncDecl(
+    {builder.getInt8Ty(), builder.getInt8Ty(), builder.getInt8Ty()},
+    builder.getVoidTy(), "clearWindow");
+  func->addParamAttr(0, llvm::Attribute::ZExt);
+  func->addParamAttr(1, llvm::Attribute::ZExt);
+  func->addParamAttr(2, llvm::Attribute::ZExt);
+}
+void Generator::makeFlushWindow()
+{
+  makeVoidFuncDecl(builder.getVoidTy(), "flushWindow");
 }
 
 void Generator::dump(std::ostream &ost) const

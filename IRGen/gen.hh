@@ -41,6 +41,8 @@ public:
   Generator(Generator &&) = delete;
   Generator &operator=(Generator &&) = delete;
 
+  void dump(std::ostream &ost) const;
+
   void makeGlobalPtr(std::string_view name);
 
   void makeGetCell();
@@ -59,7 +61,13 @@ public:
 
   void makeSwapActiveField();
 
-  void dump(std::ostream &ost) const;
+  void makeMain();
+
+  void makeCreateWindow();
+  void makeIsWindowOpen();
+  void makeHandleEvents();
+  void makeClearWindow();
+  void makeFlushWindow();
 
 private:
   llvm::Function *makeFuncDecl(const std::vector<llvm::Type *> &params,

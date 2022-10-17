@@ -2,25 +2,40 @@
 
 int main()
 {
-  irgen::Generator gen{};
-  // @pActiveField = dso_local local_unnamed_addr global i8* null, align 8
-  gen.makeGlobalPtr("pActiveField");
-  // @pNextField = dso_local local_unnamed_addr global i8* null, align 8
-  gen.makeGlobalPtr("pNextField");
+  try
+  {
+    irgen::Generator gen{};
+    // @pActiveField = dso_local local_unnamed_addr global i8* null, align 8
+    gen.makeGlobalPtr("pActiveField");
+    // @pNextField = dso_local local_unnamed_addr global i8* null, align 8
+    gen.makeGlobalPtr("pNextField");
 
-  gen.makeGenRandomBool();
+    gen.makeGenRandomBool();
 
-  gen.makeGetCell();
+    gen.makeGetCell();
+    gen.makeFillField();
+    gen.makeGetNeighbours();
+    gen.makeNewGeneration();
 
-  gen.makeFillField();
+    gen.makePutPixel();
 
-  gen.makeGetNeighbours();
+    gen.makeDrawField();
+    gen.makeSwapActiveField();
 
-  gen.makeNewGeneration();
+    gen.makeCreateWindow();
+    gen.makeIsWindowOpen();
+    gen.makeHandleEvents();
+    gen.makeClearWindow();
+    gen.makeFlushWindow();
 
-  gen.makePutPixel();
+    gen.makeMain();
 
-  gen.makeDrawField();
-
-  gen.dump(std::cout);
+    gen.dump(std::cout);
+  }
+  catch (const std::exception &ex)
+  {
+    std::cout << "Caught an exception in main().\nReason: " << ex.what()
+              << std::endl;
+    return 1;
+  }
 }

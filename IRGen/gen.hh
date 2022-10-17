@@ -29,7 +29,9 @@ private:
 
 public:
   Generator()
-    : context(), pModule(new llvm::Module("top", context)), builder(context)
+    : context(),
+      pModule(std::make_unique<llvm::Module>("top", context)),
+      builder(context)
   {}
 
   ~Generator() = default;

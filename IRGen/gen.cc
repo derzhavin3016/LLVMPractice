@@ -838,7 +838,7 @@ llvm::Function *Generator::makeFuncDecl(const std::vector<llvm::Type *> &params,
   auto *fType = llvm::FunctionType::get(retTy, argsRef, false);
 
   return llvm::Function::Create(
-    fType, llvm::Function::LinkageTypes::ExternalLinkage, name, pModule.get());
+    fType, llvm::Function::LinkageTypes::ExternalLinkage, name, pModule);
 }
 
 llvm::Function *Generator::makeVoidFuncDecl(llvm::Type *retTy,
@@ -847,7 +847,7 @@ llvm::Function *Generator::makeVoidFuncDecl(llvm::Type *retTy,
   auto *fType = llvm::FunctionType::get(retTy, false);
 
   return llvm::Function::Create(
-    fType, llvm::Function::LinkageTypes::ExternalLinkage, name, pModule.get());
+    fType, llvm::Function::LinkageTypes::ExternalLinkage, name, pModule);
 }
 
 llvm::GlobalVariable *Generator::getGlobVar(std::string_view name)

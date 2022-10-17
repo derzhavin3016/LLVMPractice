@@ -1,12 +1,11 @@
-#include "gen.hh"
+#include "cont.hh"
 
 int main()
 {
   try
   {
-    irgen::Generator gen{};
-    gen.generateIR();
-    gen.dump(std::cout);
+    ircont::Context cont{};
+    cont.genAndRun();
   }
   catch (const std::exception &ex)
   {

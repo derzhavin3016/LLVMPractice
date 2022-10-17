@@ -5,7 +5,7 @@ message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 llvm_map_components_to_libnames(LLVM_LIBS core)
 
-add_executable(irgen main.cc)
+add_executable(irgen main.cc gen.cc)
 
 target_compile_options(irgen PUBLIC -Wall -Wextra -Wpedantic -Wno-unused-parameter -O2)
 target_compile_features(irgen PRIVATE cxx_std_20)

@@ -69,6 +69,8 @@ public:
   void makeClearWindow();
   void makeFlushWindow();
 
+  void generateIR();
+
 private:
   llvm::Function *makeFuncDecl(const std::vector<llvm::Type *> &params,
                                llvm::Type *retTy, std::string_view name);

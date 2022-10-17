@@ -793,6 +793,32 @@ void Generator::makeFlushWindow()
   makeVoidFuncDecl(builder.getVoidTy(), "flushWindow");
 }
 
+void Generator::generateIR()
+{
+  makeGlobalPtr("pActiveField");
+  makeGlobalPtr("pNextField");
+
+  makeGenRandomBool();
+
+  makeGetCell();
+  makeFillField();
+  makeGetNeighbours();
+  makeNewGeneration();
+
+  makePutPixel();
+
+  makeDrawField();
+  makeSwapActiveField();
+
+  makeCreateWindow();
+  makeIsWindowOpen();
+  makeHandleEvents();
+  makeClearWindow();
+  makeFlushWindow();
+
+  makeMain();
+}
+
 void Generator::dump(std::ostream &ost) const
 {
   std::string buffer;

@@ -3,12 +3,12 @@ namespace irgen
 {
 void Generator::makeGlobalPtr(std::string_view name)
 {
-  auto *nullVal = llvm::ConstantPointerNull::get(builder.getInt8PtrTy());
-  auto *ptr = new llvm::GlobalVariable(*pModule, builder.getInt8PtrTy(), false,
-                                       llvm::GlobalVariable::CommonLinkage,
-                                       nullVal, name);
-
+  pModule->getOrInsertGlobal(name, builder.getInt8PtrTy());
+  auto *ptr = pModule->getNamedGlobal(name);
   ptr->setAlignment(llvm::MaybeAlign(8));
+  ptr->setLinkage(llvm::GlobalVariable::ExternalLinkage);
+  ptr->setInitializer(ptr->getNullValue(ptr->getType()));
+  ptr->setConstant(false);
 }
 
 void Generator::makeGetCell()
@@ -48,8 +48,8 @@ void Generator::makeGetCell()
 
 void Generator::makeGenRandomBool()
 {
-  auto *fnc = makeVoidFuncDecl(builder.getInt1Ty(), "genRandomBool");
-  fnc->addRetAttr(llvm::Attribute::ZExt);
+  makeVoidFuncDecl(builder.getInt1Ty(), "genRandomBool")
+    ->addRetAttr(llvm::Attribute::ZExt);
 }
 
 void Generator::makeFillField()

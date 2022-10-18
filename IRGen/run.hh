@@ -16,7 +16,6 @@ namespace irrun
 class Runner final
 {
 private:
-  llvm::Module *pModule{};
   std::unique_ptr<llvm::ExecutionEngine> pExec{};
   std::unordered_map<std::string_view, void *> func_map{};
 
@@ -25,7 +24,7 @@ public:
 
   auto run()
   {
-    return pExec->runFunction(pModule->getFunction("main"), {});
+    return pExec->runFunction(pExec->FindFunctionNamed("main"), {});
   }
 
 private:
@@ -37,7 +36,7 @@ private:
 };
 
 Runner::Runner(std::unique_ptr<llvm::Module> pM)
-  : pModule(pM.get()), pExec(llvm::EngineBuilder(std::move(pM)).create())
+  : pExec(llvm::EngineBuilder(std::move(pM)).create())
 {
   addToFuncMap("genRandomBool", genRandomBool);
   addToFuncMap("createWindow", createWindow);

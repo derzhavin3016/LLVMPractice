@@ -12,6 +12,12 @@ private:
   llvm::LLVMContext context{};
 
 public:
+  Context() : context()
+  {
+    llvm::InitializeNativeTarget();
+    llvm::InitializeNativeTargetAsmPrinter();
+  }
+
   void genAndRun()
   {
     auto pModule = std::make_unique<llvm::Module>("top", context);
@@ -19,7 +25,7 @@ public:
 
     gen.generateIR();
 
-    // gen.dump(std::cout);
+    gen.dump(std::cout);
 
     irrun::Runner runner(std::move(pModule));
     std::cout << "[RUNNING]\n";

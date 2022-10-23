@@ -3,7 +3,10 @@ find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
-llvm_map_components_to_libnames(LLVM_LIBS core interpreter support nativecodegen executionengine)
+
+execute_process(COMMAND llvm-config-14 --libs all
+                OUTPUT_VARIABLE LLVM_LIBS
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 add_executable(irgen main.cc gen.cc)
 

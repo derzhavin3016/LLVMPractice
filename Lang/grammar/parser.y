@@ -119,7 +119,7 @@ Statement : Assignment SCOLON {}
           | SCAN NAME SCOLON {}
           | WhileLoop {}
           | IfStatement {}
-          | ReturnStatement {}
+          | ReturnStatement SCOLON {}
 
 ReturnStatement : RETURN {}
                 | RETURN Expression {}

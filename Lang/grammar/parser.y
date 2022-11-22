@@ -1,4 +1,5 @@
 %language "c++"
+%require "3.7"
 %skeleton "lalr1.cc"
 
 %define api.value.type variant

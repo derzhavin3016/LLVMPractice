@@ -85,8 +85,6 @@ NAME      {LETTER}{LETTER_D}*
 
 {NAME}               return yy::parser::token_type::NAME;
 
-.                    return yy::parser::token_type::ERR;
-
 %%
 
 // nothing

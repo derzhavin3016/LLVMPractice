@@ -27,19 +27,23 @@ execute_process(
 add_library(lex ${FLEX_lexer_OUTPUTS})
 
 add_library(par ${CMAKE_CURRENT_BINARY_DIR}/parser.cc)
+target_include_directories(lex PUBLIC ${AST_PATH})
 
 target_include_directories(
   par
-  PUBLIC ${DRIVER_PATH} ${AST_PATH}
-  PUBLIC SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
+  PUBLIC ${DRIVER_PATH}
+  PUBLIC ${AST_PATH} SYSTEM
+  PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
+  PUBLIC ${CMAKE_SOURCE_DIR})
 
 add_executable(langI main.cc ${DRIVER_PATH}/driver.cc ${AST_PATH}/ast.cc)
 
 apply_compiler_flags(langI PUBLIC)
 target_compile_features(langI PRIVATE cxx_std_20)
 
-target_include_directories(langI SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})
-target_link_libraries(irgen PUBLIC ${LLVM_LIBS} lex par)
+target_include_directories(langI SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS}
+                                                ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(langI PUBLIC ${LLVM_LIBS} lex par)
 
 set_target_properties(langI PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                                        "${CMAKE_BINARY_DIR}/bin")

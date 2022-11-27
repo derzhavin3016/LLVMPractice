@@ -27,7 +27,7 @@ set(COMMON_WARNINGS
 -Wall
 -Wextra
 -Wpedantic
--Wno-gnu-zero-variadic-macro-arguments
+# -Wno-gnu-zero-variadic-macro-arguments
 )
 
 set(GCC_WARNINGS
@@ -69,7 +69,7 @@ set(GCC_WARNINGS
 -Wsuggest-final-types
 -Wsuggest-override
 -Wswitch-default
--Wswitch-enum
+# -Wswitch-enum
 -Wsync-nand
 -Wundef
 -Wunreachable-code

@@ -2,20 +2,26 @@
 %require "3.7"
 %skeleton "lalr1.cc"
 
+%define parse.trace
+%define parse.lac full
+
 %define api.value.type variant
+%define parse.error detailed
+%locations
 %param {Driver* driver}
 
 %code requires {
     #include <string>
     #include <memory>
+    #include "astdef.hh"
     namespace yy { class Driver; }
-    namespace langI { class INode; class ScopeNode; class FuncDeclNode; }
+    namespace llvm { class Type; }
 }
 
 %code {
-    #include "driver.hh"
     #include "ast.hh"
-    namespace yy {parser::token_type yylex(parser::semantic_type* yylval, Driver* driver);}
+    #include "driver.hh"
+    namespace yy {parser::token_type yylex(parser::semantic_type* yylval, parser::location_type *yylloc, Driver* driver);}
 }
 
 %token <std::string> NAME
@@ -40,29 +46,25 @@
        INTEGER
        SCAN PRINT
        ;
+%nterm<langI::pDNode>  VariableDeclaration
+                          RoutineDeclaration;
 
-// %nterm<std::shared_ptr<glang::ScopeN>>     globalScope
-// %nterm<std::shared_ptr<glang::ScopeN>>     scope
-// %nterm<std::shared_ptr<glang::ScopeN>>     closeSc
-// %nterm<std::shared_ptr<glang::ScopeN>>     openSc
-// %nterm<std::shared_ptr<glang::INode>>      func
-// %nterm<std::shared_ptr<glang::FuncDeclN>>  funcSign
-// %nterm<std::shared_ptr<glang::INode>>      argList
-// %nterm<std::shared_ptr<glang::INode>>      stm
-// %nterm<std::shared_ptr<glang::INode>>      declVar
-// %nterm<std::shared_ptr<glang::INode>>      lval
-// %nterm<std::shared_ptr<glang::INode>>      if
-// %nterm<std::shared_ptr<glang::INode>>      while
-// %nterm<std::shared_ptr<glang::INode>>      expr1
-// %nterm<std::shared_ptr<glang::INode>>      expr2
-// %nterm<std::shared_ptr<glang::INode>>      expr3
-// %nterm<std::shared_ptr<glang::INode>>      condition
-// %nterm<std::shared_ptr<glang::INode>>      output
-// %nterm<std::shared_ptr<glang::INode>>      stms
-// %nterm<std::shared_ptr<glang::INode>>      return
-// %nterm<std::shared_ptr<glang::INode>>      funcCall
-// %nterm<std::shared_ptr<glang::INode>>      globalArrDecl
-// %nterm<std::shared_ptr<glang::INode>>      arrAccess
+%nterm<langI::pINode> Program
+                      Parameters
+                      ParamDecl
+                      Statement
+                      ReturnStatement
+                      Assignment
+                      RoutineCall
+                      Arguments
+                      WhileLoop
+                      IfStatement
+                      Expression
+                      ExpressionTerm
+                      Primary
+                      ;
+%nterm <langI::pIStoreable> ModPrimary
+%nterm <llvm::Type *> Type PrimitiveType ArrayType;
 
 %right ASSIGN
 
@@ -84,13 +86,13 @@
 
 Parse   : Program {YYACCEPT;}
 
-Program : RoutineDeclaration {}
-        | VariableDeclaration {}
-        | Program VariableDeclaration {}
-        | Program RoutineDeclaration {}
+Program : RoutineDeclaration          { driver->m_curScope->addName($1, true); }
+        | VariableDeclaration         { driver->m_curScope->addName($1, true); }
+        | Program VariableDeclaration { driver->m_curScope->addName($2, true); }
+        | Program RoutineDeclaration  { driver->m_curScope->addName($2, true); }
 
-VariableDeclaration : VAR NAME COLON Type IS Expression {}
-                    | VAR NAME COLON Type {}
+VariableDeclaration : VAR NAME COLON Type IS Expression { $$ = std::make_shared<langI::VarDeclNode>($4, $2, $6); }
+                    | VAR NAME COLON Type               { $$ = std::make_shared<langI::VarDeclNode>($4, $2); }
 
 RoutineDeclaration : ROUTINE NAME IS Body END {}
                    | ROUTINE NAME COLON Type IS Body END {}
@@ -102,30 +104,30 @@ Parameters : ParamDecl {}
 
 ParamDecl : NAME COLON Type {}
 
-Type : PrimitiveType {}
-     | ArrayType {}
+Type : PrimitiveType { $$ = $1; }
+     | ArrayType     { $$ = $1; }
 
-PrimitiveType : INTEGER {}
+PrimitiveType : INTEGER { $$ = driver->m_ctx.getIntTy(); }
 
-ArrayType : ARRAY LBT Expression RBT PrimitiveType
+ArrayType : ARRAY LBT INT RBT PrimitiveType { $$ = langI::CodegenCtx::getArrTy($5, $3); }
 
-Body : Statement {}
-     | VariableDeclaration {}
-     | Body Statement {}
-     | Body VariableDeclaration {}
+Body : Statement                { driver->m_curScope->pushNode($1); }
+     | VariableDeclaration      { driver->m_curScope->addName($1, true); }
+     | Body Statement           { driver->m_curScope->pushNode($2); }
+     | Body VariableDeclaration { driver->m_curScope->addName($2, true); }
 
-Statement : Assignment SCOLON {}
-          | RoutineCall SCOLON {}
-          | PRINT Expression SCOLON {}
-          | SCAN NAME SCOLON {}
-          | WhileLoop {}
-          | IfStatement {}
-          | ReturnStatement SCOLON {}
+Statement : Assignment SCOLON       { $$ = $1; }
+          | RoutineCall SCOLON      { $$ = $1; }
+          | PRINT Expression SCOLON { $$ = std::make_shared<langI::PrintNode>($2); }
+          | SCAN NAME SCOLON        {}
+          | WhileLoop               { $$ = $1; }
+          | IfStatement             { $$ = $1; }
+          | ReturnStatement SCOLON  { $$ = $1; }
 
-ReturnStatement : RETURN {}
-                | RETURN Expression {}
+ReturnStatement : RETURN            { $$ = std::make_shared<langI::RetVoidNode>(); }
+                | RETURN Expression { $$ = std::make_shared<langI::RetNode>($2); }
 
-Assignment : NAME ASSIGN Expression {}
+Assignment : ModPrimary ASSIGN Expression { $$ = std::make_shared<langI::AsNode>($1, $3); }
 
 RoutineCall : NAME LP RP {}
             | NAME LP Arguments RP {}
@@ -139,43 +141,44 @@ IfStatement : IF Expression THEN Body END {}
             | IF Expression THEN Body ELSE Body END {}
 
 
-Expression : Expression OR Expression {}
-           | Expression AND Expression {}
-           | Expression XOR Expression {}
-           | Expression IS_EQ Expression {}
-           | Expression NOT_EQ Expression {}
-           | Expression GREATER Expression {}
-           | Expression LESS Expression {}
-           | Expression LS_EQ Expression {}
-           | Expression GR_EQ Expression {}
-           | Expression ADD Expression {}
-           | Expression SUB Expression {}
-           | Expression MUL Expression {}
-           | Expression DIV Expression {}
-           | Expression MOD Expression {}
-           | ExpressionTerm {}
+Expression : Expression OR Expression      { $$ = std::make_shared<langI::BinOpNode>($1, langI::BinOp::Or, $3); }
+           | Expression AND Expression     { $$ = std::make_shared<langI::BinOpNode>($1, langI::BinOp::And, $3); }
+           | Expression XOR Expression     { $$ = std::make_shared<langI::BinOpNode>($1, langI::BinOp::Xor, $3); }
+           | Expression IS_EQ Expression   { $$ = std::make_shared<langI::BinOpNode>($1, langI::BinOp::Eq, $3); }
+           | Expression NOT_EQ Expression  { $$ = std::make_shared<langI::BinOpNode>($1, langI::BinOp::Neq, $3); }
+           | Expression GREATER Expression { $$ = std::make_shared<langI::BinOpNode>($1, langI::BinOp::Greater, $3); }
+           | Expression LESS Expression    { $$ = std::make_shared<langI::BinOpNode>($1, langI::BinOp::Less, $3); }
+           | Expression LS_EQ Expression   { $$ = std::make_shared<langI::BinOpNode>($1, langI::BinOp::LeEq, $3); }
+           | Expression GR_EQ Expression   { $$ = std::make_shared<langI::BinOpNode>($1, langI::BinOp::GrEq, $3); }
+           | Expression ADD Expression     { $$ = std::make_shared<langI::BinOpNode>($1, langI::BinOp::Add, $3); }
+           | Expression SUB Expression     { $$ = std::make_shared<langI::BinOpNode>($1, langI::BinOp::Sub, $3); }
+           | Expression MUL Expression     { $$ = std::make_shared<langI::BinOpNode>($1, langI::BinOp::Mul, $3); }
+           | Expression DIV Expression     { $$ = std::make_shared<langI::BinOpNode>($1, langI::BinOp::Div, $3); }
+           | Expression MOD Expression     { $$ = std::make_shared<langI::BinOpNode>($1, langI::BinOp::Mod, $3); }
+           | ExpressionTerm                { $$ = $1; }
 
-ExpressionTerm : LP Expression RP {}
-               | Primary {}
+ExpressionTerm : LP Expression RP { $$ = $2; }
+               | Primary { $$ = $1; }
 
-Primary : INT {}
-        | ModPrimary {}
+Primary : INT { $$ = std::make_shared<langI::IntNode>($1); }
+        | ModPrimary { $$ = $1; }
+        | RoutineCall {}
 
-ModPrimary : NAME {}
+ModPrimary : NAME { $$ = std::dynamic_pointer_cast<langI::IStoreable>(driver->m_curScope->findName($1)); }
            | NAME LBT Expression RBT {}
-           | RoutineCall {}
+
 
 %%
 
 namespace yy {
 
-parser::token_type yylex (parser::semantic_type* yylval, Driver* driver)
+parser::token_type yylex(parser::semantic_type* yylval, parser::location_type *yylloc, Driver* driver)
 {
   return driver->yylex(yylval);
 }
 
-void parser::error (const std::string& msg)
+void parser::error(const parser::location_type &loc, const std::string& msg)
 {
-  std::cout << msg << " in line: " << std::endl;
+  std::cout << loc << ':' << msg << std::endl;
 }
 }

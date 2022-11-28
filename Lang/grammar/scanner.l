@@ -80,7 +80,7 @@ NAME      {LETTER}{LETTER_D}*
 "array"              return yy::parser::token_type::ARRAY;
 "integer"            return yy::parser::token_type::INTEGER;
 
-"scan"               return yy::parser::token_type::SCAN;
+"?"                  return yy::parser::token_type::SCAN;
 "print"              return yy::parser::token_type::PRINT;
 
 {NAME}               return yy::parser::token_type::NAME;

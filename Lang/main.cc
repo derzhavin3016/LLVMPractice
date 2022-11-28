@@ -1,10 +1,14 @@
 #include <iostream>
+#include <sstream>
 
 #include "driver.hh"
 
 int main()
 {
-  yy::Driver driver(std::cin, std::cout);
+  std::string inp = "routine main : integer is\n\tprint 2 + 2;\nend\n";
+  std::istringstream is(inp);
+
+  yy::Driver driver(is, std::cout);
   auto res = driver.parse();
 
   if (res)

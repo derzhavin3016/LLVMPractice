@@ -59,6 +59,71 @@ llvm::Value *PrintNode::codegen(CodegenCtx &ctx)
   return ctx.builder.CreateCall(printFnc, {val});
 }
 
+llvm::Value *ScanNode::codegen(CodegenCtx &ctx)
+{
+  auto scanFunc = ctx.pModule->getFunction(kScanFnName);
+  if (scanFunc == nullptr)
+    throw std::runtime_error{"Cannot find scan function"};
+
+  return ctx.builder.CreateCall(scanFunc);
+}
+
+void FuncDeclNode::makeFuncSig(CodegenCtx &ctx)
+{
+  if (m_func)
+    return;
+
+  std::vector<llvm::Type *> argTypes;
+  argTypes.reserve(m_params.size());
+
+  if (m_ret == nullptr)
+    m_ret = ctx.builder.getVoidTy();
+
+  for (auto &&param : m_params)
+  {
+    argTypes.push_back(param->getTy());
+    m_body->addDecl(param);
+  }
+
+  auto *funcTy = argTypes.empty()
+                   ? llvm::FunctionType::get(m_ret, false)
+                   : llvm::FunctionType::get(m_ret, argTypes, false);
+
+  m_func = llvm::Function::Create(funcTy, llvm::Function::ExternalLinkage,
+                                  getName(), *ctx.pModule);
+
+  // Add all allocas to scope
+  for (std::size_t i = 0; i < m_params.size(); ++i)
+    m_params[i]->setAlloca(m_func->getArg(static_cast<unsigned>(i)));
+}
+
+llvm::Value *FuncDeclNode::codegen(CodegenCtx &ctx)
+{
+  makeFuncSig(ctx);
+
+  auto initBB = llvm::BasicBlock::Create(ctx.context, "", m_func);
+  ctx.builder.SetInsertPoint(initBB);
+
+  m_body->codegen(ctx);
+
+  return nullptr;
+}
+
+llvm::Value *FuncCallNode::codegen(CodegenCtx &ctx)
+{
+  auto fdecl = std::dynamic_pointer_cast<FuncDeclNode>(m_funcDecl);
+
+  std::vector<llvm::Value *> vals;
+  vals.reserve(m_args.size());
+
+  for (auto &&arg : m_args)
+    vals.push_back(arg->codegen(ctx));
+
+  auto *func = fdecl->getFunc();
+
+  return ctx.builder.CreateCall(func, vals);
+}
+
 pDNode ScopeNode::findName(const std::string &name) const
 {
   auto it = m_symtab.find(name);
@@ -75,5 +140,28 @@ pDNode ScopeNode::findName(const std::string &name) const
 }
 
 llvm::Value *IfNode::codegen(CodegenCtx &ctx)
-{}
+{
+  auto cond = m_cond->codegen(ctx);
+  ctx.builder.CreateICmpNE(cond, ctx.getInt(0));
+  auto parFnc = m_parScope->getFunc();
+
+  auto bbTrue = llvm::BasicBlock::Create(ctx.context, "", parFnc->getFunc());
+  auto bbFalse = llvm::BasicBlock::Create(ctx.context, "", parFnc->getFunc());
+  auto bbNext = llvm::BasicBlock::Create(ctx.context, "", parFnc->getFunc());
+  ctx.builder.CreateCondBr(cond, bbTrue, bbFalse);
+
+  ctx.builder.SetInsertPoint(bbTrue);
+  m_tScope->codegen(ctx);
+  ctx.builder.CreateBr(bbNext);
+
+  ctx.builder.SetInsertPoint(bbFalse);
+
+  if (m_fScope != nullptr)
+    m_fScope->codegen(ctx);
+
+  ctx.builder.CreateBr(bbNext);
+  ctx.builder.SetInsertPoint(bbNext);
+
+  return nullptr;
+}
 } // namespace langI

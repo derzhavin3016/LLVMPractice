@@ -8,6 +8,7 @@ message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 set(GRAMMAR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/grammar")
 set(DRIVER_PATH "${CMAKE_CURRENT_SOURCE_DIR}/driver")
 set(AST_PATH "${CMAKE_CURRENT_SOURCE_DIR}/ast")
+set(STD_PATH "${CMAKE_CURRENT_SOURCE_DIR}/std")
 
 bison_target(parser grammar/parser.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cc
              DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/parser.hh)
@@ -27,11 +28,11 @@ execute_process(
 add_library(lex ${FLEX_lexer_OUTPUTS})
 
 add_library(par ${CMAKE_CURRENT_BINARY_DIR}/parser.cc)
-target_include_directories(lex PUBLIC ${AST_PATH})
+target_include_directories(lex PUBLIC ${AST_PATH} ${STD_PATH})
 
 target_include_directories(
   par
-  PUBLIC ${DRIVER_PATH}
+  PUBLIC ${DRIVER_PATH} ${STD_PATH}
   PUBLIC ${AST_PATH} SYSTEM
   PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
   PUBLIC ${CMAKE_SOURCE_DIR})

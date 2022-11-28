@@ -11,11 +11,13 @@
 #include <unordered_map>
 #include <vector>
 
+#include "stddefs.hh"
+
 namespace langI
 {
-using IntT = std::int64_t;
 
 constexpr std::string_view kPrintFnName = "__I_print";
+constexpr std::string_view kScanFnName = "__I_scan";
 
 struct CodegenCtx final
 {
@@ -46,11 +48,6 @@ struct CodegenCtx final
   {
     return llvm::ArrayType::get(tp, size);
   }
-};
-
-enum class Types
-{
-
 };
 
 enum class BinOp
@@ -141,6 +138,12 @@ public:
   llvm::Value *codegen(CodegenCtx &ctx) override;
 };
 
+class ScanNode : public INode
+{
+public:
+  llvm::Value *codegen(CodegenCtx &ctx) override;
+};
+
 class ScopeNode : public INode
 {
 public:
@@ -150,19 +153,36 @@ private:
   std::vector<pINode> m_children{};
   pwSNode m_parent{};
   SymTab m_symtab{};
+  std::weak_ptr<FuncDeclNode> m_parentFunc{};
 
 public:
   ScopeNode() = default;
-  ScopeNode(pSNode par) : m_parent(par)
+  ScopeNode(pSNode par) : m_parent(par), m_parentFunc(par->m_parentFunc)
   {}
+
+  void setFunc(std::shared_ptr<FuncDeclNode> pFunc)
+  {
+    m_parentFunc = pFunc;
+  }
+
+  auto getFunc() const
+  {
+    return m_parentFunc.lock();
+  }
+
+  auto getParent() const
+  {
+    return m_parent.lock();
+  }
 
   void pushNode(pINode child)
   {
     m_children.push_back(child);
   }
 
-  void addName(pDNode decl, bool push = false)
+  void addDecl(pDNode decl, bool push = false)
   {
+    assert(decl != nullptr);
     m_symtab[decl->getName()] = decl;
     if (push)
       pushNode(decl);
@@ -228,6 +248,11 @@ public:
     ctx.builder.CreateStore(val, m_alloca);
   }
 
+  auto *getTy() const
+  {
+    return m_type;
+  }
+
   llvm::Value *codegen(CodegenCtx &ctx) override
   {
     auto &bld = ctx.builder;
@@ -247,6 +272,65 @@ public:
 
     throw std::runtime_error("Unknown type");
   }
+
+  void setAlloca(llvm::Value *alloca)
+  {
+    m_alloca = alloca;
+  }
+};
+
+class ParamDeclNode : public VarDeclNode
+{
+public:
+  ParamDeclNode(llvm::Type *type, const std::string &name)
+    : VarDeclNode(type, name)
+  {}
+
+  llvm::Value *codegen(CodegenCtx &) override
+  {
+    return nullptr;
+  }
+};
+
+using pParamDNode = std::shared_ptr<ParamDeclNode>;
+
+class FuncDeclNode : public DeclNode
+{
+  llvm::Type *m_ret = nullptr;
+  std::vector<pParamDNode> m_params;
+  llvm::Function *m_func = nullptr;
+  pSNode m_body{};
+
+public:
+  FuncDeclNode(const std::string &name, const std::vector<pParamDNode> &params,
+               pSNode body, llvm::Type *ret = nullptr)
+    : DeclNode(name), m_ret(ret), m_params(params), m_body(body)
+  {}
+
+  FuncDeclNode(const FuncDeclNode &) = default;
+  FuncDeclNode &operator=(const FuncDeclNode &) = default;
+
+  auto *getFunc() const
+  {
+    return m_func;
+  }
+
+  llvm::Value *codegen(CodegenCtx &ctx) override;
+
+private:
+  void makeFuncSig(CodegenCtx &ctx);
+};
+
+class FuncCallNode : public INode
+{
+  pINode m_funcDecl{};
+  std::vector<pINode> m_args{};
+
+public:
+  FuncCallNode(pINode fdecl, const std::vector<pINode> &args = {})
+    : m_funcDecl(fdecl), m_args(args)
+  {}
+  llvm::Value *codegen(CodegenCtx &ctx) override;
 };
 
 class IfNode : public INode

@@ -95,6 +95,7 @@ function(apply_compiler_flags TARGET VISIBILIY)
 
   # Compile stuff
   target_compile_options(${TARGET} ${VISIBILIY} "$<$<CONFIG:Debug>:${COMMON_WARNINGS}>")
+  target_compile_options(${TARGET} ${VISIBILIY} "$<$<CONFIG:Debug>:-g>")
   target_compile_options(${TARGET} ${VISIBILIY} "$<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:Debug>:${GCC_WARNINGS}>>")
   target_compile_options(${TARGET} ${VISIBILIY} "$<$<CONFIG:Release>:-O2>")
 endfunction()

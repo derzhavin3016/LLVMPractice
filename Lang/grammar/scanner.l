@@ -19,7 +19,7 @@ DIGIT     [0-9]
 LETTER    [a-zA-Z]
 LETTER_D  [A-Za-z0-9_]
 
-INT       [1-9]{DIGIT}*
+INT       [1-9]{DIGIT}*|0
 NAME      {LETTER}{LETTER_D}*
 
 %%

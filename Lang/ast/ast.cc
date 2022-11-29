@@ -142,13 +142,14 @@ pDNode ScopeNode::findName(const std::string &name) const
 llvm::Value *IfNode::codegen(CodegenCtx &ctx)
 {
   auto cond = m_cond->codegen(ctx);
-  ctx.builder.CreateICmpNE(cond, ctx.getInt(0));
+  auto cond_bool = ctx.builder.CreateBitCast(cond, ctx.builder.getInt1Ty());
+
   auto parFnc = m_parScope->getFunc();
 
   auto bbTrue = llvm::BasicBlock::Create(ctx.context, "", parFnc->getFunc());
   auto bbFalse = llvm::BasicBlock::Create(ctx.context, "", parFnc->getFunc());
   auto bbNext = llvm::BasicBlock::Create(ctx.context, "", parFnc->getFunc());
-  ctx.builder.CreateCondBr(cond, bbTrue, bbFalse);
+  ctx.builder.CreateCondBr(cond_bool, bbTrue, bbFalse);
 
   ctx.builder.SetInsertPoint(bbTrue);
   m_tScope->codegen(ctx);

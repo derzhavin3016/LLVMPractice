@@ -153,6 +153,7 @@ private:
   std::vector<pINode> m_children{};
   pwSNode m_parent{};
   SymTab m_symtab{};
+  std::vector<pSNode> m_childScopes{};
   std::weak_ptr<FuncDeclNode> m_parentFunc{};
 
 public:
@@ -178,6 +179,11 @@ public:
   void pushNode(pINode child)
   {
     m_children.push_back(child);
+  }
+
+  void pushScope(pSNode child)
+  {
+    m_childScopes.push_back(child);
   }
 
   void addDecl(pDNode decl, bool push = false)

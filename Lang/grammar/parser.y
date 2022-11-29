@@ -66,7 +66,8 @@
                       ;
 
 %nterm <std::shared_ptr<langI::VarDeclNode>> VariableDeclaration GVarDecl;
-%nterm <langI::pIStoreable> ModPrimary
+%nterm <langI::pIStoreable> ModPrimary;
+%nterm <langI::pSNode> TrueScope FalseScope;
 %nterm <llvm::Type *> Type PrimitiveType ArrayType;
 
 %right ASSIGN
@@ -170,9 +171,12 @@ Arguments : Expression { driver->m_curArgs.push_back($1); }
 
 WhileLoop : WHILE Expression LOOP Body END {}
 
-IfStatement : IF Expression THEN Body END {}
-            | IF Expression THEN Body ELSE Body END {}
+IfStatement : IF Expression TrueScope END { $$ = std::make_shared<langI::IfNode>($3, $2, driver->m_curScope); }
+            | IF Expression TrueScope FalseScope { $$ = std::make_shared<langI::IfNode>($3, $2, driver->m_curScope, $4); }
 
+TrueScope : THEN {driver->makeCurScopeChild(); } Body { $$ = driver->m_curScope; driver->resetScope(); }
+
+FalseScope : ELSE {driver->makeCurScopeChild(); } Body END {$$ = driver->m_curScope; driver->resetScope(); }
 
 Expression : Expression OR Expression      { $$ = std::make_shared<langI::BinOpNode>($1, langI::BinOp::Or, $3); }
            | Expression AND Expression     { $$ = std::make_shared<langI::BinOpNode>($1, langI::BinOp::And, $3); }

@@ -1,0 +1,14 @@
+routine main : integer is
+  var haha : integer is 5;
+  if haha > 20 then
+    print 1;
+  else
+    haha := 20;
+    if haha != 22 then
+      print 5;
+    else
+      print 228;
+    end
+  end
+  return 0;
+end

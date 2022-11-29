@@ -69,7 +69,9 @@ private:
 
   void makeCurScopeChild()
   {
-    m_curScope = std::make_shared<langI::ScopeNode>(m_curScope);
+    auto par = m_curScope;
+    m_curScope = std::make_shared<langI::ScopeNode>(par);
+    par->pushScope(m_curScope);
   }
 
   void resetScope()

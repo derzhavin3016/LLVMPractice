@@ -1,0 +1,9 @@
+var hehe : integer;
+
+routine main : integer is
+  var haha : integer is 6;
+  hehe := 5;
+  haha := hehe * haha;
+  print hehe;
+  return 0;
+end

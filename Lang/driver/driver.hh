@@ -23,6 +23,7 @@ private:
   langI::pSNode m_gScope{}, m_curScope{};
   std::vector<langI::pParamDNode> m_curFunParams{};
   std::vector<langI::pINode> m_curArgs{};
+  std::shared_ptr<langI::FuncDeclNode> m_curFunc{};
 
   friend parser;
 
@@ -43,6 +44,17 @@ public:
 
   void codegen()
   {
+    auto printTy = llvm::FunctionType::get(m_ctx.builder.getVoidTy(),
+                                           {m_ctx.getIntTy()}, false);
+
+    llvm::Function::Create(printTy, llvm::Function::ExternalLinkage,
+                           langI::kPrintFnName, *m_ctx.pModule);
+
+    auto scanTy = llvm::FunctionType::get(m_ctx.getIntTy(), false);
+
+    llvm::Function::Create(scanTy, llvm::Function::ExternalLinkage,
+                           langI::kScanFnName, *m_ctx.pModule);
+
     m_gScope->codegen(m_ctx);
   }
   void dumpIR(std::ostream &out) const;

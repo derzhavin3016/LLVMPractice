@@ -1,3 +1,4 @@
 routine main : integer is
   print 2 + 2;
+  return 228;
 end

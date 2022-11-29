@@ -253,17 +253,24 @@ public:
     return m_type;
   }
 
+  auto getInitExpr() const
+  {
+    return m_initExpr;
+  }
+
   llvm::Value *codegen(CodegenCtx &ctx) override
   {
     auto &bld = ctx.builder;
     if (m_alloca != nullptr)
-      m_alloca = bld.CreateAlloca(m_type);
+      return bld.CreateLoad(m_type, m_alloca);
+
+    m_alloca = bld.CreateAlloca(m_type);
     if (m_type->isIntegerTy())
     {
       if (m_initExpr)
         bld.CreateStore(m_initExpr->codegen(ctx), m_alloca);
 
-      return bld.CreateLoad(m_type, m_alloca);
+      return nullptr;
     }
 
     if (m_type->isArrayTy())
@@ -276,6 +283,40 @@ public:
   void setAlloca(llvm::Value *alloca)
   {
     m_alloca = alloca;
+  }
+
+  auto getAlloca() const
+  {
+    return m_alloca;
+  }
+};
+
+class GlobDeclNode : public VarDeclNode
+{
+public:
+  GlobDeclNode(std::shared_ptr<VarDeclNode> pvar) : VarDeclNode(*pvar)
+  {}
+
+  llvm::Value *codegen(CodegenCtx &ctx) override
+  {
+    if (getAlloca() != nullptr)
+      return ctx.builder.CreateLoad(getTy(), getAlloca());
+
+    ctx.pModule->getOrInsertGlobal(getName(), getTy());
+    auto *ptr = ctx.pModule->getNamedGlobal(getName());
+    ptr->setLinkage(llvm::GlobalVariable::ExternalLinkage);
+
+    if (getTy()->isArrayTy())
+      ptr->setInitializer(llvm::ConstantAggregateZero::get(getTy()));
+    else if (getTy()->isIntegerTy())
+      ptr->setInitializer(llvm::ConstantInt::get(ctx.getIntTy(), 0));
+    else
+      throw std::runtime_error("Uknown type");
+
+    ptr->setConstant(false);
+    setAlloca(ptr);
+
+    return ptr;
   }
 };
 

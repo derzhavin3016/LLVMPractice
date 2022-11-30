@@ -80,10 +80,7 @@ void FuncDeclNode::makeFuncSig(CodegenCtx &ctx)
     m_ret = ctx.builder.getVoidTy();
 
   for (auto &&param : m_params)
-  {
     argTypes.push_back(param->getTy());
-    m_body->addDecl(param);
-  }
 
   auto *funcTy = argTypes.empty()
                    ? llvm::FunctionType::get(m_ret, false)
@@ -129,6 +126,12 @@ pDNode ScopeNode::findName(const std::string &name) const
   auto it = m_symtab.find(name);
   if (it != m_symtab.end())
     return it->second;
+
+  auto parFnc = m_parentFunc.lock();
+  if (parFnc && name == parFnc->getName())
+    return parFnc;
+  parFnc.reset();
+
   auto pParent = m_parent.lock();
 
   if (pParent)

@@ -39,7 +39,13 @@ public:
   [[nodiscard]] bool parse()
   {
     parser par(this);
-    return !par.parse();
+    bool res = !par.parse();
+    m_curScope.reset();
+    m_curFunParams.clear();
+    m_curArgs.clear();
+    m_curFunc.reset();
+
+    return res;
   }
 
   void codegen()

@@ -333,9 +333,9 @@ public:
     : VarDeclNode(type, name)
   {}
 
-  llvm::Value *codegen(CodegenCtx &) override
+  llvm::Value *codegen(CodegenCtx &ctx) override
   {
-    return nullptr;
+    return ctx.builder.CreateLoad(getTy(), getAlloca());
   }
 };
 
@@ -352,7 +352,10 @@ public:
   FuncDeclNode(const std::string &name, const std::vector<pParamDNode> &params,
                pSNode body, llvm::Type *ret = nullptr)
     : DeclNode(name), m_ret(ret), m_params(params), m_body(body)
-  {}
+  {
+    for (auto &&param : m_params)
+      m_body->addDecl(param);
+  }
 
   FuncDeclNode(const FuncDeclNode &) = default;
   FuncDeclNode &operator=(const FuncDeclNode &) = default;

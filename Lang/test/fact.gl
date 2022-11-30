@@ -1,0 +1,7 @@
+routine fact : integer is
+  return fact();
+end
+
+routine main : integer is
+  print fact();
+end

@@ -165,4 +165,29 @@ llvm::Value *IfNode::codegen(CodegenCtx &ctx)
 
   return nullptr;
 }
+
+llvm::Value *WhileNode::codegen(CodegenCtx &ctx)
+{
+  auto parFnc = m_parScope->getFunc();
+
+  auto bbCond = llvm::BasicBlock::Create(ctx.context, "", parFnc->getFunc());
+  auto bbBody = llvm::BasicBlock::Create(ctx.context, "", parFnc->getFunc());
+  auto bbNext = llvm::BasicBlock::Create(ctx.context, "", parFnc->getFunc());
+
+  ctx.builder.CreateBr(bbCond);
+  ctx.builder.SetInsertPoint(bbCond);
+
+  auto cond = m_cond->codegen(ctx);
+  auto cond_bool = ctx.builder.CreateBitCast(cond, ctx.builder.getInt1Ty());
+  ctx.builder.CreateCondBr(cond_bool, bbBody, bbNext);
+
+  ctx.builder.SetInsertPoint(bbBody);
+  m_body->codegen(ctx);
+
+  ctx.builder.CreateBr(bbCond);
+
+  ctx.builder.SetInsertPoint(bbNext);
+
+  return nullptr;
+}
 } // namespace langI

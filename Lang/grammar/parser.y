@@ -169,7 +169,7 @@ RoutineCall : NAME LP RP { $$ = std::make_shared<langI::FuncCallNode>(driver->m_
 Arguments : Expression { driver->m_curArgs.push_back($1); }
           | Arguments COMMA Expression { driver->m_curArgs.push_back($3); }
 
-WhileLoop : WHILE Expression LOOP Body END {}
+WhileLoop : WHILE Expression LOOP {driver->makeCurScopeChild(); } Body END { $$ = std::make_shared<langI::WhileNode>($2, driver->m_curScope, driver->m_curScope->getParent()); driver->resetScope(); }
 
 IfStatement : IF Expression TrueScope END { $$ = std::make_shared<langI::IfNode>($3, $2, driver->m_curScope); }
             | IF Expression TrueScope FalseScope { $$ = std::make_shared<langI::IfNode>($3, $2, driver->m_curScope, $4); }

@@ -1,0 +1,5 @@
+routine main : integer is
+  while 1 loop
+    print 1;
+  end
+end

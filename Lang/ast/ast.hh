@@ -392,6 +392,19 @@ public:
   llvm::Value *codegen(CodegenCtx &ctx) override;
 };
 
+class WhileNode : public INode
+{
+  pSNode m_body, m_parScope;
+  pINode m_cond;
+
+public:
+  WhileNode(pINode cond, pSNode body, pSNode par)
+    : m_body(body), m_parScope(par), m_cond(cond)
+  {}
+
+  llvm::Value *codegen(CodegenCtx &ctx) override;
+};
+
 class RetNode : public INode
 {
   pINode m_expr;

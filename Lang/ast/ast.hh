@@ -373,7 +373,7 @@ private:
 
 class FuncCallNode : public INode
 {
-  pINode m_funcDecl{};
+  std::weak_ptr<INode> m_funcDecl{};
   std::vector<pINode> m_args{};
 
 public:

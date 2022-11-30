@@ -90,10 +90,10 @@
 
 Parse   : Program {YYACCEPT;}
 
-Program : RoutineDeclaration          { driver->m_gScope->addDecl($1, true); driver->m_curFunc.reset(); }
+Program : RoutineDeclaration          { driver->m_gScope->addDecl($1, true); }
         | GVarDecl                    { driver->m_gScope->addDecl($1, true); }
         | Program GVarDecl            { driver->m_gScope->addDecl($2, true); }
-        | Program RoutineDeclaration  { driver->m_gScope->addDecl($2, true); driver->m_curFunc.reset(); }
+        | Program RoutineDeclaration  { driver->m_gScope->addDecl($2, true); }
 
 GVarDecl : VariableDeclaration { $$ = std::make_shared<langI::GlobDeclNode>($1); }
 

@@ -108,7 +108,7 @@ llvm::Value *FuncDeclNode::codegen(CodegenCtx &ctx)
 
 llvm::Value *FuncCallNode::codegen(CodegenCtx &ctx)
 {
-  auto fdecl = std::dynamic_pointer_cast<FuncDeclNode>(m_funcDecl);
+  auto fdecl = std::dynamic_pointer_cast<FuncDeclNode>(m_funcDecl.lock());
 
   std::vector<llvm::Value *> vals;
   vals.reserve(m_args.size());

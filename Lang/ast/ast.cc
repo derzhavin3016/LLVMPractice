@@ -102,7 +102,7 @@ llvm::Value *FuncDeclNode::codegen(CodegenCtx &ctx)
   ctx.builder.SetInsertPoint(initBB);
 
   m_body->codegen(ctx);
-
+  ctx.builder.ClearInsertionPoint();
   return nullptr;
 }
 
@@ -147,23 +147,28 @@ llvm::Value *IfNode::codegen(CodegenCtx &ctx)
   auto cond = m_cond->codegen(ctx);
   auto cond_bool = ctx.builder.CreateBitCast(cond, ctx.builder.getInt1Ty());
 
-  auto parFnc = m_parScope->getFunc();
+  auto parFnc = m_parScope.lock()->getFunc();
 
-  auto bbTrue = llvm::BasicBlock::Create(ctx.context, "", parFnc->getFunc());
-  auto bbFalse = llvm::BasicBlock::Create(ctx.context, "", parFnc->getFunc());
-  auto bbNext = llvm::BasicBlock::Create(ctx.context, "", parFnc->getFunc());
+  auto bbTrue =
+    llvm::BasicBlock::Create(ctx.context, "true", parFnc->getFunc());
+  auto bbFalse =
+    llvm::BasicBlock::Create(ctx.context, "false", parFnc->getFunc());
+  auto bbNext =
+    llvm::BasicBlock::Create(ctx.context, "merge", parFnc->getFunc());
   ctx.builder.CreateCondBr(cond_bool, bbTrue, bbFalse);
 
   ctx.builder.SetInsertPoint(bbTrue);
   m_tScope->codegen(ctx);
-  ctx.builder.CreateBr(bbNext);
+  if (bbTrue->getTerminator() == nullptr)
+    ctx.builder.CreateBr(bbNext);
 
   ctx.builder.SetInsertPoint(bbFalse);
 
   if (m_fScope != nullptr)
     m_fScope->codegen(ctx);
 
-  ctx.builder.CreateBr(bbNext);
+  if (bbFalse->getTerminator() == nullptr)
+    ctx.builder.CreateBr(bbNext);
   ctx.builder.SetInsertPoint(bbNext);
 
   return nullptr;
@@ -171,11 +176,14 @@ llvm::Value *IfNode::codegen(CodegenCtx &ctx)
 
 llvm::Value *WhileNode::codegen(CodegenCtx &ctx)
 {
-  auto parFnc = m_parScope->getFunc();
+  auto parFnc = m_parScope.lock()->getFunc();
 
-  auto bbCond = llvm::BasicBlock::Create(ctx.context, "", parFnc->getFunc());
-  auto bbBody = llvm::BasicBlock::Create(ctx.context, "", parFnc->getFunc());
-  auto bbNext = llvm::BasicBlock::Create(ctx.context, "", parFnc->getFunc());
+  auto bbCond =
+    llvm::BasicBlock::Create(ctx.context, "cond", parFnc->getFunc());
+  auto bbBody =
+    llvm::BasicBlock::Create(ctx.context, "body", parFnc->getFunc());
+  auto bbNext =
+    llvm::BasicBlock::Create(ctx.context, "next", parFnc->getFunc());
 
   ctx.builder.CreateBr(bbCond);
   ctx.builder.SetInsertPoint(bbCond);
@@ -187,7 +195,8 @@ llvm::Value *WhileNode::codegen(CodegenCtx &ctx)
   ctx.builder.SetInsertPoint(bbBody);
   m_body->codegen(ctx);
 
-  ctx.builder.CreateBr(bbCond);
+  if (bbBody->getTerminator() == nullptr)
+    ctx.builder.CreateBr(bbCond);
 
   ctx.builder.SetInsertPoint(bbNext);
 

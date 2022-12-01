@@ -155,7 +155,7 @@ Statement : Assignment SCOLON       { $$ = $1; }
           | IfStatement             { $$ = $1; }
           | ReturnStatement SCOLON  { $$ = $1; }
 
-ReturnStatement : RETURN            { $$ = std::make_shared<langI::RetVoidNode>(); }
+ReturnStatement : RETURN            { $$ = std::make_shared<langI::RetNode>(); }
                 | RETURN Expression { $$ = std::make_shared<langI::RetNode>($2); }
 
 Assignment : ModPrimary ASSIGN Expression { $$ = std::make_shared<langI::AsNode>($1, $3); }

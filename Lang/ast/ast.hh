@@ -199,7 +199,10 @@ public:
   llvm::Value *codegen(CodegenCtx &ctx) override
   {
     for (auto &&child : m_children)
-      child->codegen(ctx);
+      if (auto bb = ctx.builder.GetInsertBlock();
+          bb == nullptr || bb->getTerminator() == nullptr)
+        child->codegen(ctx);
+
     return nullptr;
   }
 };
@@ -333,9 +336,9 @@ public:
     : VarDeclNode(type, name)
   {}
 
-  llvm::Value *codegen(CodegenCtx &ctx) override
+  llvm::Value *codegen(CodegenCtx &) override
   {
-    return ctx.builder.CreateLoad(getTy(), getAlloca());
+    return getAlloca();
   }
 };
 
@@ -385,7 +388,8 @@ public:
 
 class IfNode : public INode
 {
-  pSNode m_tScope, m_fScope, m_parScope;
+  pSNode m_tScope, m_fScope;
+  pwSNode m_parScope;
   pINode m_cond;
 
 public:
@@ -397,7 +401,8 @@ public:
 
 class WhileNode : public INode
 {
-  pSNode m_body, m_parScope;
+  pSNode m_body;
+  pwSNode m_parScope;
   pINode m_cond;
 
 public:
@@ -413,24 +418,14 @@ class RetNode : public INode
   pINode m_expr;
 
 public:
-  RetNode(pINode expr) : m_expr(expr)
+  RetNode(pINode expr = nullptr) : m_expr(expr)
   {}
 
   llvm::Value *codegen(CodegenCtx &ctx) override
   {
-    auto expr = m_expr->codegen(ctx);
+    auto *expr = m_expr ? m_expr->codegen(ctx) : nullptr;
 
     return ctx.builder.CreateRet(expr);
-  }
-};
-
-struct RetVoidNode : public INode
-{
-  RetVoidNode() = default;
-
-  llvm::Value *codegen(CodegenCtx &ctx) override
-  {
-    return ctx.builder.CreateRetVoid();
   }
 };
 

@@ -100,34 +100,28 @@ GVarDecl : VariableDeclaration { $$ = std::make_shared<langI::GlobDeclNode>($1);
 VariableDeclaration : VAR NAME COLON Type IS Expression SCOLON { $$ = std::make_shared<langI::VarDeclNode>($4, $2, $6); }
                     | VAR NAME COLON Type SCOLON              { $$ = std::make_shared<langI::VarDeclNode>($4, $2); }
 
-RoutineDeclaration : RoutineName {
-                                  driver->m_curFunc = std::make_shared<langI::FuncDeclNode>($1, driver->m_curFunParams, driver->m_curScope);
-                                  driver->m_curScope->setFunc(driver->m_curFunc);
-                                 } FuncBody {
-                                              $$ = driver->m_curScope->getFunc();
-                                            }
-                   | RoutineName COLON Type {
-                                              driver->m_curFunc = std::make_shared<langI::FuncDeclNode>($1, driver->m_curFunParams, driver->m_curScope, $3);
-                                              driver->m_curScope->setFunc(driver->m_curFunc);
-                                            } FuncBody {
-                                                          $$ = driver->m_curScope->getFunc();
-                                                        }
-                   | RoutineName LP Parameters RP {
-                                                    driver->m_curFunc = std::make_shared<langI::FuncDeclNode>($1, driver->m_curFunParams, driver->m_curScope);
-                                                    driver->m_curScope->setFunc(driver->m_curFunc);
-                                                  } FuncBody {
-                                                                $$ = driver->m_curScope->getFunc();
-                                                                driver->m_curFunParams.clear();
-                                                              }
-                   | RoutineName LP Parameters RP COLON Type {
-                                                               driver->m_curFunc = std::make_shared<langI::FuncDeclNode>($1, driver->m_curFunParams, driver->m_curScope, $6);
-                                                               driver->m_curScope->setFunc(driver->m_curFunc);
-                                                             } FuncBody {
-                                                                          $$ = driver->m_curScope->getFunc();
-                                                                          driver->m_curFunParams.clear();
-                                                                        }
+RoutineHeader : RoutineName                               {
+                                                            driver->m_curFunc = std::make_shared<langI::FuncDeclNode>($1, driver->m_curFunParams, driver->m_curScope);
+                                                          }
+              | RoutineName COLON Type                    {
+                                                            driver->m_curFunc = std::make_shared<langI::FuncDeclNode>($1, driver->m_curFunParams, driver->m_curScope, $3);
+                                                          }
+              | RoutineName LP Parameters RP              {
+                                                            driver->m_curFunc = std::make_shared<langI::FuncDeclNode>($1, driver->m_curFunParams, driver->m_curScope);
+                                                          }
+              | RoutineName LP Parameters RP COLON Type   {
+                                                            driver->m_curFunc = std::make_shared<langI::FuncDeclNode>($1, driver->m_curFunParams, driver->m_curScope, $6);
+                                                          }
+
+RoutineDeclaration : RoutineHeader {
+                                     driver->m_curScope->setFunc(driver->m_curFunc);
+                                     driver->m_curFunParams.clear();
+                                   } FuncBody {
+                                                $$ = driver->m_curScope->getFunc();
+                                              }
 
 FuncBody : IS Body END {}
+         | SCOLON      { driver->m_curFunc->markAsDecl(); }
 
 RoutineName : ROUTINE NAME { driver->makeGlobalScopeChild(); $$ = $2; }
 

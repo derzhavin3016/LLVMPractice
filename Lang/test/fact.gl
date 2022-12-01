@@ -6,6 +6,6 @@ routine fact(n : integer) : integer is
 end
 
 routine main : integer is
-  print fact(10);
+  print fact(?);
   return 0;
 end

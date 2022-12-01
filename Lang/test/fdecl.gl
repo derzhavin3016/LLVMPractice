@@ -1,0 +1,6 @@
+routine haha(a : integer) : integer;
+
+routine main : integer is
+  print 10000;
+  return 0;
+end

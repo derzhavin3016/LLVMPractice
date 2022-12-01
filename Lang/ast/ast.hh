@@ -364,15 +364,22 @@ public:
 
 class ParamDeclNode : public VarDeclNode
 {
+  llvm::Argument *m_arg = nullptr;
+
 public:
   ParamDeclNode(llvm::Type *type, const std::string &name)
     : VarDeclNode(type, name)
   {}
 
-  llvm::Value *codegen(CodegenCtx &) override
+  ParamDeclNode(const ParamDeclNode &) = default;
+  ParamDeclNode &operator=(const ParamDeclNode &) = default;
+
+  void setArg(llvm::Argument *arg)
   {
-    return getAlloca();
+    m_arg = arg;
   }
+
+  llvm::Value *codegen(CodegenCtx &ctx) override;
 };
 
 using pParamDNode = std::shared_ptr<ParamDeclNode>;
@@ -383,6 +390,7 @@ class FuncDeclNode : public DeclNode
   std::vector<pParamDNode> m_params;
   llvm::Function *m_func = nullptr;
   pSNode m_body{};
+  bool m_onlyDecl = false;
 
 public:
   FuncDeclNode(const std::string &name, const std::vector<pParamDNode> &params,
@@ -402,6 +410,11 @@ public:
   }
 
   llvm::Value *codegen(CodegenCtx &ctx) override;
+
+  void markAsDecl()
+  {
+    m_onlyDecl = true;
+  }
 
 private:
   void makeFuncSig(CodegenCtx &ctx);

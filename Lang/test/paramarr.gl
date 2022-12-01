@@ -1,0 +1,11 @@
+routine haha(ax : integer) : integer is
+  ax := 2;
+  return ax;
+end
+
+routine main : integer is
+  var aa : integer is 10;
+  print haha(aa);
+  print aa;
+  return 0;
+end

@@ -68,6 +68,17 @@ llvm::Value *ScanNode::codegen(CodegenCtx &ctx)
   return ctx.builder.CreateCall(scanFunc);
 }
 
+llvm::Value *ParamDeclNode::codegen(CodegenCtx &ctx)
+{
+  if (getAlloca() == nullptr)
+  {
+    setAlloca(ctx.builder.CreateAlloca(getTy()));
+    ctx.builder.CreateStore(m_arg, getAlloca());
+  }
+
+  return ctx.builder.CreateLoad(getTy(), getAlloca());
+}
+
 void FuncDeclNode::makeFuncSig(CodegenCtx &ctx)
 {
   if (m_func)
@@ -91,15 +102,21 @@ void FuncDeclNode::makeFuncSig(CodegenCtx &ctx)
 
   // Add all allocas to scope
   for (std::size_t i = 0; i < m_params.size(); ++i)
-    m_params[i]->setAlloca(m_func->getArg(static_cast<unsigned>(i)));
+    m_params[i]->setArg(m_func->getArg(static_cast<unsigned>(i)));
 }
 
 llvm::Value *FuncDeclNode::codegen(CodegenCtx &ctx)
 {
   makeFuncSig(ctx);
 
+  if (m_onlyDecl)
+    return nullptr;
+
   auto initBB = llvm::BasicBlock::Create(ctx.context, "", m_func);
   ctx.builder.SetInsertPoint(initBB);
+
+  for (auto &&param : m_params)
+    param->codegen(ctx);
 
   m_body->codegen(ctx);
   ctx.builder.ClearInsertionPoint();

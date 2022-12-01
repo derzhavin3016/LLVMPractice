@@ -203,7 +203,10 @@ Primary : INT         { $$ = std::make_shared<langI::IntNode>($1); }
         | RoutineCall { $$ = $1; }
 
 ModPrimary : NAME { $$ = std::dynamic_pointer_cast<langI::IStoreable>(driver->m_curScope->findName($1)); }
-           | NAME LBT Expression RBT {}
+           | NAME LBT Expression RBT {
+                                        auto decl = std::dynamic_pointer_cast<langI::VarDeclNode>(driver->m_curScope->findName($1));
+                                        $$ = std::make_shared<langI::ArrAccNode>($1, decl, $3);
+                                      }
 
 
 %%

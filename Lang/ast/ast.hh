@@ -283,8 +283,7 @@ public:
     }
 
     if (m_type->isArrayTy())
-      return bld.CreateInBoundsGEP(m_type, m_alloca,
-                                   {ctx.getInt(0), ctx.getInt(0)});
+      return nullptr;
 
     throw std::runtime_error("Unknown type");
   }
@@ -297,6 +296,40 @@ public:
   auto getAlloca() const
   {
     return m_alloca;
+  }
+};
+
+class ArrAccNode : public IStoreable
+{
+  std::weak_ptr<VarDeclNode> m_decl{};
+  pINode m_idx{};
+
+public:
+  ArrAccNode(const std::string &name, std::shared_ptr<VarDeclNode> pvar,
+             pINode idx)
+    : IStoreable(name), m_decl(pvar), m_idx(idx)
+  {}
+  auto *makeGep(CodegenCtx &ctx)
+  {
+    auto *idx = m_idx->codegen(ctx);
+    auto decl = m_decl.lock();
+    auto *ty = decl->getTy();
+
+    if (!ty->isArrayTy())
+      throw std::runtime_error{"Trying to index a non-array symbol"};
+
+    return ctx.builder.CreateInBoundsGEP(ty, decl->getAlloca(),
+                                         {ctx.builder.getInt64(0), idx});
+  }
+
+  llvm::Value *codegen(CodegenCtx &ctx) override
+  {
+    return ctx.builder.CreateLoad(m_decl.lock()->getTy()->getArrayElementType(),
+                                  makeGep(ctx));
+  }
+  void store(CodegenCtx &ctx, llvm::Value *val) override
+  {
+    ctx.builder.CreateStore(val, makeGep(ctx));
   }
 };
 

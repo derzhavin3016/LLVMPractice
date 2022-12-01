@@ -1,0 +1,7 @@
+var hehe : array[20] integer;
+routine main : integer is
+  var haha : array[10] integer;
+  haha[4 + 2 * 2 / 3] := 5;
+  print haha[5];
+  return 0;
+end

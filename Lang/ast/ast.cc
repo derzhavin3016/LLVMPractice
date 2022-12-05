@@ -70,13 +70,13 @@ llvm::Value *ScanNode::codegen(CodegenCtx &ctx)
 
 llvm::Value *ParamDeclNode::codegen(CodegenCtx &ctx)
 {
-  if (getAlloca() == nullptr)
-  {
-    setAlloca(ctx.builder.CreateAlloca(getTy()));
-    ctx.builder.CreateStore(m_arg, getAlloca());
-  }
+  if (getAlloca() != nullptr)
+    return ctx.builder.CreateLoad(getTy(), getAlloca());
 
-  return ctx.builder.CreateLoad(getTy(), getAlloca());
+  setAlloca(ctx.builder.CreateAlloca(getTy()));
+  ctx.builder.CreateStore(m_arg, getAlloca());
+
+  return nullptr;
 }
 
 void FuncDeclNode::makeFuncSig(CodegenCtx &ctx)

@@ -1,0 +1,119 @@
+// Compile:
+// clang a.ll ../../Lang/std/std.c ../Life/libGraphLib.a -lsfml-window -lsfml-system -lsfml-graphics -lstdc++
+//
+var FIELDH : integer;
+var FIELDW : integer;
+
+var fstField : array[160000] integer;
+var secField : array[160000] integer;
+
+routine genRandomBool : integer;
+routine createWindow(w : integer, h : integer);
+routine isWindowOpen : integer;
+routine handleEvents;
+routine clearWindow(r : integer, g : integer, b : integer);
+routine putPixel(x : integer, y : integer, r : integer, g : integer, b : integer);
+routine flushWindow;
+
+routine fillField is
+  var x : integer is 0;
+  while x < FIELDW * FIELDH loop
+    fstField[x] := genRandomBool();
+    x := x + 1;
+  end
+  return;
+end
+
+routine getCell(x : integer, y : integer) : integer is
+  var x : integer is (x + FIELDW) % FIELDW;
+  var y : integer is (y + FIELDH) % FIELDH;
+
+  return fstField[y * FIELDW + x];
+end
+
+routine getNeighbours(x : integer, y : integer) : integer is
+  var ret : integer is 0;
+  ret := getCell(x - 1, y - 1) + getCell(x, y - 1)+ getCell(x + 1, y - 1) + getCell(x + 1, y) +
+         getCell(x + 1, y + 1) + getCell(x, y + 1) + getCell(x - 1, y + 1)
+         + getCell(x - 1, y);
+  return ret;
+end
+
+routine newGeneration is
+  var y : integer is 0;
+  while y < FIELDH loop
+    var x : integer is 0;
+    while x < FIELDW loop
+      var numN : integer is getNeighbours(x, y);
+      var alive : integer is 0;
+
+      if getCell(x, y) != 0 then
+        if numN == 2 or numN == 3 then
+          alive := 1;
+        else
+          alive := 0;
+        end
+      else
+        if numN == 3 then
+         alive := 1;
+        else
+         alive := 0;
+        end
+      end
+
+      secField[y * FIELDW + x] := alive;
+
+      x := x + 1;
+    end
+    y := y + 1;
+  end
+  return;
+end
+
+routine drawField is
+  var y : integer is 0;
+  while y < FIELDH loop
+    var x : integer is 0;
+    while x < FIELDW loop
+
+      if getCell(x, y) != 0 then
+        putPixel(x, y, 0, 255, 0);
+      else
+        putPixel(x, y, 0, 0, 0);
+      end
+
+      x := x + 1;
+    end
+    y := y + 1;
+  end
+  return;
+end
+
+routine swapActiveField is
+  var x : integer is 0;
+  while x < FIELDH * FIELDW loop
+      fstField[x] := secField[x];
+      x := x + 1;
+  end
+  return;
+end
+
+routine main : integer is
+  FIELDH := 400;
+  FIELDW := 400;
+  createWindow(FIELDW, FIELDH);
+  fillField();
+
+  while isWindowOpen() != 0 loop
+    handleEvents();
+
+    clearWindow(0, 0, 255);
+
+    newGeneration();
+    drawField();
+    swapActiveField();
+
+    flushWindow();
+  end
+  return 0;
+end

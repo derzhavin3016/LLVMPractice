@@ -176,7 +176,7 @@ llvm::Value *IfNode::codegen(CodegenCtx &ctx)
 
   ctx.builder.SetInsertPoint(bbTrue);
   m_tScope->codegen(ctx);
-  if (bbTrue->getTerminator() == nullptr)
+  if (ctx.builder.GetInsertBlock()->getTerminator() == nullptr)
     ctx.builder.CreateBr(bbNext);
 
   ctx.builder.SetInsertPoint(bbFalse);
@@ -184,7 +184,7 @@ llvm::Value *IfNode::codegen(CodegenCtx &ctx)
   if (m_fScope != nullptr)
     m_fScope->codegen(ctx);
 
-  if (bbFalse->getTerminator() == nullptr)
+  if (ctx.builder.GetInsertBlock()->getTerminator() == nullptr)
     ctx.builder.CreateBr(bbNext);
   ctx.builder.SetInsertPoint(bbNext);
 
@@ -212,7 +212,7 @@ llvm::Value *WhileNode::codegen(CodegenCtx &ctx)
   ctx.builder.SetInsertPoint(bbBody);
   m_body->codegen(ctx);
 
-  if (bbBody->getTerminator() == nullptr)
+  if (ctx.builder.GetInsertBlock()->getTerminator() == nullptr)
     ctx.builder.CreateBr(bbCond);
 
   ctx.builder.SetInsertPoint(bbNext);

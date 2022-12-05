@@ -103,13 +103,14 @@ VariableDeclaration : VAR NAME COLON Type IS Expression SCOLON { $$ = std::make_
 RoutineHeader : RoutineName                               {
                                                             driver->m_curFunc = std::make_shared<langI::FuncDeclNode>($1, driver->m_curFunParams, driver->m_curScope);
                                                           }
-              | RoutineName COLON Type                    {
+              | RoutineName COLON PrimitiveType           {
                                                             driver->m_curFunc = std::make_shared<langI::FuncDeclNode>($1, driver->m_curFunParams, driver->m_curScope, $3);
                                                           }
               | RoutineName LP Parameters RP              {
                                                             driver->m_curFunc = std::make_shared<langI::FuncDeclNode>($1, driver->m_curFunParams, driver->m_curScope);
                                                           }
-              | RoutineName LP Parameters RP COLON Type   {
+              | RoutineName LP Parameters RP COLON PrimitiveType
+                                                          {
                                                             driver->m_curFunc = std::make_shared<langI::FuncDeclNode>($1, driver->m_curFunParams, driver->m_curScope, $6);
                                                           }
 

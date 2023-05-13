@@ -3,8 +3,12 @@ find_package(SFML 2.5 COMPONENTS system window graphics REQUIRED)
 add_library(GraphLib STATIC graph.cc)
 
 target_link_libraries(GraphLib PRIVATE sfml-window sfml-system sfml-graphics)
-target_compile_options(GraphLib PUBLIC -Wall -Wextra -Wpedantic -O2)
+target_compile_options(GraphLib PRIVATE -Wall -Wextra -Wpedantic -O2)
 target_compile_features(GraphLib PRIVATE cxx_std_17)
+
+if (GLANG_ONLY_LIB)
+  return()
+endif()
 
 add_executable(life main.c)
 target_link_libraries(life PRIVATE GraphLib)

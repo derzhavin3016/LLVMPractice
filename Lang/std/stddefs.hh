@@ -5,7 +5,7 @@
 
 namespace langI
 {
-using IntT = std::int64_t;
+using IntT = std::int32_t;
 } // namespace langI
 
 #endif /* __LANG_STD_STDDEFS_HH__ */

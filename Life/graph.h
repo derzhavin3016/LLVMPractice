@@ -8,17 +8,17 @@
 extern "C"
 {
 #endif
-  int64_t genRandomBool(void);
+  int32_t genRandomBool(void);
 
-  void createWindow(int64_t width, int64_t height);
+  void createWindow(int32_t width, int32_t height);
 
-  int64_t isWindowOpen(void);
+  int32_t isWindowOpen(void);
 
   void handleEvents(void);
 
-  void clearWindow(int64_t r, int64_t g, int64_t b);
+  void clearWindow(int32_t r, int32_t g, int32_t b);
 
-  void putPixel(int64_t x, int64_t y, int64_t r, int64_t g, int64_t b);
+  void putPixel(int32_t x, int32_t y, int32_t r, int32_t g, int32_t b);
 
   void flushWindow(void);
 

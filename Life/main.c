@@ -8,7 +8,7 @@
 bool *pActiveField = 0;
 bool *pNextField = 0;
 
-bool getCell(int64_t x, int64_t y)
+bool getCell(int32_t x, int32_t y)
 {
   x = (x + FIELD_WIDTH) % FIELD_WIDTH;
   y = (y + FIELD_HEIGHT) % FIELD_HEIGHT;
@@ -25,8 +25,8 @@ void fillField(void)
 
 uint8_t getNeighbours(uint32_t x, uint32_t y)
 {
-  int64_t ix = (int64_t)x;
-  int64_t iy = (int64_t)y;
+  int32_t ix = (int32_t)x;
+  int32_t iy = (int32_t)y;
 
   uint8_t num_neigh = 0;
 

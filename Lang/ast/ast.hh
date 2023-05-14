@@ -36,15 +36,15 @@ struct CodegenCtx final
 
   auto getIntTy()
   {
-    return builder.getInt64Ty();
+    return builder.getInt32Ty();
   }
 
   auto getInt(IntT val)
   {
-    return builder.getInt64(static_cast<std::uint64_t>(val));
+    return builder.getInt32(static_cast<std::uint32_t>(val));
   }
 
-  static auto getArrTy(llvm::Type *tp, std::uint64_t size)
+  static auto getArrTy(llvm::Type *tp, std::uint32_t size)
   {
     return llvm::ArrayType::get(tp, size);
   }
@@ -110,7 +110,7 @@ public:
   llvm::Value *codegen(CodegenCtx &ctx) override
   {
     return llvm::ConstantInt::get(ctx.getIntTy(),
-                                  static_cast<std::uint64_t>(m_val), true);
+                                  static_cast<std::uint32_t>(m_val), true);
   }
 };
 
@@ -319,7 +319,7 @@ public:
       throw std::runtime_error{"Trying to index a non-array symbol"};
 
     return ctx.builder.CreateInBoundsGEP(ty, decl->getAlloca(),
-                                         {ctx.builder.getInt64(0), idx});
+                                         {ctx.builder.getInt32(0), idx});
   }
 
   llvm::Value *codegen(CodegenCtx &ctx) override

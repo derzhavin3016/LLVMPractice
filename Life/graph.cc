@@ -11,24 +11,24 @@ static sf::Clock Clock{};
 
 extern "C"
 {
-  int64_t genRandomBool(void)
+  int32_t genRandomBool(void)
   {
     std::random_device rd;
     std::mt19937 gen{rd()};
 
-    std::uniform_int_distribution<int64_t> dist{0, 1};
+    std::uniform_int_distribution<int32_t> dist{0, 1};
 
     return dist(gen);
   }
 
-  void createWindow(int64_t width, int64_t height)
+  void createWindow(int32_t width, int32_t height)
   {
     graph::MainWindow.create(sf::VideoMode(width, height), "");
     graph::MainWindow.setPosition({100, 100});
     graph::MainWindow.setVerticalSyncEnabled(true);
   }
 
-  int64_t isWindowOpen(void)
+  int32_t isWindowOpen(void)
   {
     return graph::MainWindow.isOpen();
   }
@@ -43,7 +43,7 @@ extern "C"
         graph::MainWindow.close();
   }
 
-  void clearWindow(int64_t r, int64_t g, int64_t b)
+  void clearWindow(int32_t r, int32_t g, int32_t b)
   {
     graph::MainWindow.clear({static_cast<uint8_t>(r), static_cast<uint8_t>(g),
                              static_cast<uint8_t>(b)});
@@ -61,7 +61,7 @@ extern "C"
     graph::MainWindow.setTitle(ss.str());
   }
 
-  void putPixel(int64_t x, int64_t y, int64_t r, int64_t g, int64_t b)
+  void putPixel(int32_t x, int32_t y, int32_t r, int32_t g, int32_t b)
   {
     auto coord = sf::Vector2f(x, y);
     sf::RectangleShape pixel;
